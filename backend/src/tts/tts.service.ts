@@ -1,6 +1,6 @@
 import { Injectable, Inject, Logger } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
-import { ElevenLabs } from '@elevenlabs/elevenlabs-js';
+import { ElevenLabsClient } from '@elevenlabs/elevenlabs-js';
 import * as fs from 'fs/promises';
 import * as path from 'path';
 
@@ -26,7 +26,7 @@ export class TtsService {
   private readonly logger = new Logger(TtsService.name);
 
   constructor(
-    @Inject('ELEVEN_LABS_CLIENT') private readonly elevenLabs: ElevenLabs,
+    @Inject('ELEVEN_LABS_CLIENT') private readonly elevenLabs: ElevenLabsClient,
     private readonly configService: ConfigService,
   ) {}
 
@@ -61,17 +61,26 @@ export class TtsService {
       
       const response = await this.elevenLabs.textToSpeech.convert(finalVoiceId, {
         text: cleanText,
-        model_id: finalOptions.modelId,
-        voice_settings: {
+        modelId: finalOptions.modelId,
+        voiceSettings: {
           stability: finalOptions.stability,
-          similarity_boost: finalOptions.similarityBoost,
+          similarityBoost: finalOptions.similarityBoost,
           style: finalOptions.style,
-          use_speaker_boost: finalOptions.useSpeakerBoost,
+          useSpeakerBoost: finalOptions.useSpeakerBoost,
         },
       });
 
       // Save the audio file
-      const audioBuffer = Buffer.from(await response.arrayBuffer());
+      const reader = response.getReader();
+      const chunks: Uint8Array[] = [];
+      
+      while (true) {
+        const { done, value } = await reader.read();
+        if (done) break;
+        chunks.push(value);
+      }
+      
+      const audioBuffer = Buffer.concat(chunks);
       await fs.writeFile(filePath, audioBuffer);
       
       this.logger.debug(`Audio saved to: ${filePath}`);
@@ -102,12 +111,12 @@ export class TtsService {
       const response = await this.elevenLabs.voices.getAll();
       
       return response.voices.map(voice => ({
-        voice_id: voice.voice_id,
+        voice_id: voice.voiceId,
         name: voice.name,
         category: voice.category,
         labels: voice.labels || {},
-        preview_url: voice.preview_url,
-        available_for_tiers: voice.available_for_tiers,
+        preview_url: voice.previewUrl,
+        available_for_tiers: voice.availableForTiers,
       }));
       
     } catch (error) {

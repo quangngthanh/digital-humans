@@ -20,7 +20,7 @@ import { HealthController } from './common/controllers/health.controller';
       load: [configuration],
       validationSchema,
       validationOptions: {
-        allowUnknown: false,
+        allowUnknown: true,
         abortEarly: true,
       },
     }),

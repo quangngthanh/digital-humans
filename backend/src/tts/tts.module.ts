@@ -1,6 +1,6 @@
 import { Module } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
-import { ElevenLabs } from '@elevenlabs/elevenlabs-js';
+import { ElevenLabsClient } from '@elevenlabs/elevenlabs-js';
 
 import { TtsService } from './tts.service';
 
@@ -14,7 +14,7 @@ import { TtsService } from './tts.service';
         if (!apiKey) {
           throw new Error('ELEVEN_LABS_API_KEY is required');
         }
-        return new ElevenLabs({ apiKey });
+        return new ElevenLabsClient({ apiKey });
       },
       inject: [ConfigService],
     },
