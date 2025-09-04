@@ -216,6 +216,29 @@ export function Avatar(props: AvatarProps) {
     }),
   });
 
+  useControls("MorphTarget", () =>
+    Object.assign(
+      {},
+      ...Object.keys(nodes.EyeLeft.morphTargetDictionary || {}).map((key) => {
+        return {
+          [key]: {
+            label: key,
+            value: 0,
+            min: nodes.EyeLeft.morphTargetInfluences?.[
+              nodes.EyeLeft.morphTargetDictionary?.[key] as number
+            ] || 0,
+            max: 1,
+            onChange: (val: number) => {
+              if (setupMode) {
+                lerpMorphTarget(key, val, 1);
+              }
+            },
+          },
+        };
+      })
+    )
+  );
+
   // Blinking effect
   useEffect(() => {
     let blinkTimeout: NodeJS.Timeout;
