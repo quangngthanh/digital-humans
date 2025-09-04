@@ -21,7 +21,7 @@ export const ChatProvider = ({ children }: ChatProviderProps) => {
       setLoading(true);
       setError(null);
       
-      const response = await fetch(`${backendUrl}/api/v1/chat`, {
+      const response = await fetch(`${backendUrl}/chat`, {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
