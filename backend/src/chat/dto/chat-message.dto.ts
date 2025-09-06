@@ -1,5 +1,5 @@
 import { IsString, IsNotEmpty, IsOptional, MaxLength } from 'class-validator';
-import { ApiProperty } from '@nestjs/swagger';
+import { ApiProperty, ApiPropertyOptional } from '@nestjs/swagger';
 
 export class ChatMessageDto {
   @ApiProperty({
@@ -11,4 +11,13 @@ export class ChatMessageDto {
   @IsNotEmpty()
   @MaxLength(1000)
   message: string;
+
+  @ApiPropertyOptional({
+    description: 'Language for the conversation',
+    example: 'vietnamese',
+    default: 'vietnamese'
+  })
+  @IsString()
+  @IsOptional()
+  language?: string = 'vietnamese';
 }

@@ -30,11 +30,11 @@ export class ChatController {
   @ApiResponse({ status: 400, description: 'Invalid request data' })
   @ApiResponse({ status: 500, description: 'Internal server error' })
   async sendMessage(@Body() chatMessageDto: ChatMessageDto): Promise<ChatResponseDto> {
-    const { message } = chatMessageDto;
+    const { message, language = 'vietnamese' } = chatMessageDto;
     
-    this.logger.debug(`Received chat message: ${message?.substring(0, 50)}...`);
+    this.logger.debug(`Received chat message: ${message?.substring(0, 50)}... (language: ${language})`);
     
-    const messages = await this.chatService.processMessage(message);
+    const messages = await this.chatService.processMessage(message, language);
     
     return { messages };
   }

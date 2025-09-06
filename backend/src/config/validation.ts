@@ -20,7 +20,7 @@ export const validationSchema = Joi.object({
   GEMINI_MODEL: Joi.string().default('gemini-2.0-flash-exp'),
   AI_MAX_TOKENS: Joi.number().default(1024),
   AI_TEMPERATURE: Joi.number().min(0).max(1).default(0.7),
-  
+
   DEFAULT_VOICE_ID: Joi.string().default('RmcV9cAq1TByxNSgbii7'),
   TTS_MODEL: Joi.string().default('eleven_flash_v2_5'),
   TTS_STABILITY: Joi.number().min(0).max(1).default(0.5),
@@ -28,6 +28,8 @@ export const validationSchema = Joi.object({
   TTS_STYLE: Joi.number().min(0).max(1).default(0.2),
   TTS_SPEAKER_BOOST: Joi.boolean().default(true),
   
+  USE_LLM: Joi.boolean().default(false),
+
   // Paths
   AUDIOS_DIR: Joi.string().default('./audios'),
   RHUBARB_PATH: Joi.string().default('./bin/rhubarb.exe'),

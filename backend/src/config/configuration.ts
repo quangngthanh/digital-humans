@@ -31,6 +31,9 @@ export default registerAs('app', () => ({
     useSpeakerBoost: process.env.TTS_SPEAKER_BOOST === 'true' || true,
   },
 
+  analyzer: {
+    useLLM: process.env.USE_LLM === 'true' || false,
+  },
   // File paths and external tools
   paths: {
     audiosDir: process.env.AUDIOS_DIR || './audios',

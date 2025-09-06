@@ -1,6 +1,6 @@
 import { FacialExpressions, VisemeMapping } from "@/types/avatar";
 
-export const avatarModel = "/models/64f1a714fe61576b46f27ca2.glb";
+export const avatarModel = "/models/68bafcdfc11cea25ec03e4f1.glb";
 export const animationsModel = "/models/animations.glb";
 
 /**
@@ -147,6 +147,16 @@ export const facialExpressions: FacialExpressions = {
   sleepy: {
     eyeBlinkLeft: 0.7,
     eyeBlinkRight: 0.7,
+    browDownLeft: 0.5,
+    browDownRight: 0.5,
+    eyeLookDownLeft: 0.3,
+    eyeLookDownRight: 0.3,
+  },
+
+  /** 😴 Closed eyes - drooping eyelids */
+  closedEyes: {
+    eyeBlinkLeft: 1,
+    eyeBlinkRight: 1,
     browDownLeft: 0.5,
     browDownRight: 0.5,
     eyeLookDownLeft: 0.3,

@@ -1,0 +1,156 @@
+{
+  "language": "vietnamese",
+  "locale": "vi-VN",
+  "culturalContext": {
+    "formalityLevels": ["casual", "formal", "intimate"],
+    "relationshipTerms": {
+      "romantic": ["anh", "em", "yêu", "iu", "cưng", "baby"],
+      "casual": ["bạn", "mình", "tao", "may", "bro", "sis"],
+      "formal": ["anh/chị", "quý khách", "thưa", "dạ"]
+    },
+    "ageBasedCommunication": {
+      "young": {
+        "slang": ["lầy", "xịn", "cool", "dzui", "chill", "flex"],
+        "expressions": ["bruh", "oke", "fine", "wtf", "lol"]
+      },
+      "mature": {
+        "formal": ["ạ", "dạ", "thưa", "kính thưa"],
+        "polite": ["xin lỗi", "cảm ơn", "cho phép", "được phép"]
+      }
+    }
+  },
+  "emotionKeywords": {
+    "happy": {
+      "primary": ["vui", "hạnh phúc", "phấn khích", "tuyệt vời", "mừng", "sung sướng"],
+      "slang": ["cool", "xịn", "đỉnh", "ngon", "bá cháy", "cháy túi"],
+      "expressions": ["hihi", "hehe", "yayyy", "wow", "yeah", "yay"],
+      "intensifiers": ["quá", "cực", "siêu", "vô cùng", "rất"]
+    },    "sad": {
+      "primary": ["buồn", "khóc", "đau khổ", "cô đơn", "tủi thân", "thương tâm"],
+      "slang": ["emo", "blue", "tệ", "down", "stress"],
+      "expressions": ["huhu", "wuwu", "T.T", ":'(", "QAQ", "ToT"],
+      "intensifiers": ["vô cùng", "cực kỳ", "thật sự", "quá"]
+    },
+    "romantic": {
+      "primary": ["yêu", "tình yêu", "thương", "nhớ", "mến", "quý"],
+      "intimate": ["em yêu anh", "anh yêu em", "yêu thương", "trái tim", "tim anh"],
+      "expressions": ["❤️", "💕", "😘", "🥰", "💖", "💝"],
+      "terms": ["cưng", "baby", "honey", "sweetheart", "darling"]
+    },
+    "playful": {
+      "primary": ["vui nhộn", "tinh nghịch", "đùa", "chơi", "nghịch ngợm"],
+      "slang": ["lầy", "hài", "troll", "vui tính", "bựa", "khùng"],
+      "expressions": ["haha", "lol", "😂", "🤣", "xD", "kekeke"],
+      "actions": ["chơi", "đùa", "nghịch", "làm trò"]
+    },
+    "frustrated": {
+      "primary": ["bực", "tức", "khó chịu", "phiền", "cáu", "gằn"],
+      "strong": ["điên", "tức giận", "ghét", "cáu kỉnh", "bực mình"],
+      "expressions": ["ờm", "hức", "😠", "😡", "grr", "hmph"],
+      "slang": ["fail", "toang", "điên nữa", "mệt mỏi"]
+    },
+    "surprised": {
+      "primary": ["ngạc nhiên", "bất ngờ", "kinh ngạc", "sửng sốt"],
+      "expressions": ["ơ", "ô", "wow", "omg", "wut", "hả"],
+      "reactions": ["😮", "😯", "🤯", "😲", "👀"],
+      "slang": ["wtf", "what", "gì vậy", "sao vậy"]
+    },
+    "caring": {
+      "primary": ["quan tâm", "chăm sóc", "lo lắng", "yêu thương", "che chở"],
+      "expressions": ["đừng buồn", "anh/em ổn không", "cần gì cứ nói"],
+      "actions": ["ôm", "an ủi", "chăm sóc", "lo lắng"],
+      "terms": ["cưng", "bé", "con", "baby"]
+    },
+    "excited": {
+      "primary": ["phấn khích", "hào hứng", "háo hức", "hưng phấn"],
+      "expressions": ["wow", "amazing", "tuyệt", "quá tuyệt"],
+      "slang": ["xịn sò", "đỉnh cao", "bá đạo"],
+      "reactions": ["🤩", "🔥", "💥", "⚡"]
+    }
+  },  "contextPatterns": {
+    "greeting": {
+      "morning": ["chào buổi sáng", "sáng tốt lành", "morning", "good morning"],
+      "general": ["chào", "xin chào", "hello", "hi", "chào bạn", "hey"],
+      "casual": ["yo", "hí", "alo", "hei", "sup"],
+      "formal": ["kính chào", "xin kính chào"]
+    },
+    "goodbye": {
+      "formal": ["tạm biệt", "chào tạm biệt", "hẹn gặp lại"],
+      "casual": ["bye", "bai bai", "see you", "về đây", "88"],
+      "romantic": ["ngủ ngon", "yêu em", "hẹn gặp lại anh", "miss you"],
+      "abrupt": ["đi đây", "off", "tạch"]
+    },
+    "question": {
+      "patterns": ["\\?", "tại sao", "làm sao", "như thế nào", "khi nào", "ở đâu", "ai"],
+      "casual": ["mà", "hả", "dzậy", "sao vậy", "thế à"],
+      "seeking_help": ["giúp", "hướng dẫn", "chỉ", "bảo", "help"],
+      "confirmation": ["có phải", "đúng không", "right", "đúng rồi"]
+    },
+    "compliment": {
+      "appearance": ["đẹp", "xinh", "đẹp trai", "cute", "dễ thương", "hot", "sexy"],
+      "personality": ["tốt", "dễ thương", "ngoan", "hiền", "thông minh", "tuyệt"],
+      "general": ["tuyệt vời", "amazing", "perfect", "tốt quá", "xuất sắc"],
+      "slang": ["xịn", "đỉnh", "chất", "bá đạo", "ngầu"]
+    },
+    "flirting": {
+      "direct": ["em đẹp quá", "anh đẹp trai", "crush", "thích", "fall"],
+      "subtle": ["dễ thương", "cute", "😘", "💕", "hehe"],
+      "playful": ["tán", "thả thính", "😏", "😉", "tán tỉnh"],
+      "intimate": ["nhớ em", "yêu anh", "muốn ôm", "kiss"]
+    },
+    "comfort": {
+      "support": ["đừng buồn", "mọi thứ sẽ ổn", "anh ở đây", "em không sao"],
+      "empathy": ["hiểu rồi", "thông cảm", "cảm thông", "đồng cảm"],
+      "encouragement": ["cố lên", "cheer up", "tin tưởng", "mạnh mẽ lên"]
+    }
+  },  "intensityModifiers": {
+    "amplifiers": {
+      "high": ["rất", "cực kỳ", "vô cùng", "siêu", "mega", "ultra", "cực"],
+      "medium": ["khá", "tương đối", "phần nào", "khá là"],
+      "emphasis": ["!!!", "thật sự", "thực sự", "really", "definitely"]
+    },
+    "diminishers": {
+      "low": ["hơi", "một chút", "có phần", "khá là", "hình như"],
+      "uncertain": ["có lẽ", "chắc", "có thể", "maybe", "perhaps"]
+    },
+    "punctuationPatterns": {
+      "excitement": ["!!!", "!+", "💥", "🔥"],
+      "questioning": ["???", "\\?+", "🤔", "🙄"],
+      "love": ["❤️+", "💕+", "😘+", "💖+"],
+      "emphasis": ["[A-Z]{2,}", "CAPS"]
+    }
+  },
+  "culturalNuances": {
+    "relationshipStages": {
+      "stranger": {
+        "terms": ["bạn", "anh/chị"],
+        "emotionMapping": "formal_polite",
+        "appropriateEmotions": ["happy", "curious", "thoughtful", "caring"]
+      },
+      "friend": {
+        "terms": ["bạn", "mình", "cậu", "tao/may"],
+        "emotionMapping": "casual_friendly",
+        "appropriateEmotions": ["playful", "happy", "excited", "caring", "frustrated"]
+      },
+      "romantic": {
+        "terms": ["em", "anh", "yêu", "cưng", "baby"],
+        "emotionMapping": "intimate_romantic",
+        "appropriateEmotions": ["romantic", "caring", "playful", "shy", "mischievous"]
+      }
+    },
+    "contextualRules": {
+      "formalSituations": {
+        "avoid": ["slang", "intimate_terms", "playful_expressions"],
+        "prefer": ["formal_language", "respectful_tone"]
+      },
+      "casualConversations": {
+        "allow": ["slang", "expressions", "casual_terms"],
+        "encourage": ["natural_language", "friendly_tone"]
+      },
+      "romanticContext": {
+        "prefer": ["intimate_terms", "romantic_expressions", "caring_tone"],
+        "intensify": ["emotional_expressions", "personal_connection"]
+      }
+    }
+  }
+}

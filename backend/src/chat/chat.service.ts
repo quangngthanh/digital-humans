@@ -3,8 +3,7 @@ import { AiService, AiMessage } from '../ai/ai.service';
 import { TtsService } from '../tts/tts.service';
 import { LipsyncService } from '../lipsync/lipsync.service';
 import { MessageDto } from './dto/chat-response.dto';
-import * as path from 'path';
-import * as fs from 'fs/promises';
+import { EmotionType, ContextType, DurationType } from './dto/emotional-intent.dto';
 
 @Injectable()
 export class ChatService {
@@ -16,18 +15,14 @@ export class ChatService {
     private readonly lipsyncService: LipsyncService,
   ) {}
 
-  async processMessage(userMessage?: string): Promise<MessageDto[]> {
-    // Handle empty message with predefined responses
-    if (!userMessage?.trim()) {
-      return this.getDefaultMessages();
-    }
+  async processMessage(userMessage?: string, language: string = 'vietnamese'): Promise<MessageDto[]> {
 
     try {
-      this.logger.debug(`Processing user message: ${userMessage.substring(0, 50)}...`);
+      this.logger.debug(`Processing user message: ${userMessage.substring(0, 50)}... (language: ${language})`);
 
-      // Step 1: Generate AI response
-      const aiMessages = await this.aiService.generateResponse(userMessage);
-      
+      // Step 1: Generate AI response with language support
+      const aiMessages = await this.aiService.generateResponse(userMessage, language);
+
       // Step 2: Generate audio and lipsync for each message
       const processedMessages = await Promise.all(
         aiMessages.map((message, index) => this.processAiMessage(message, index))
@@ -47,6 +42,7 @@ export class ChatService {
     
     try {
       this.logger.debug(`Processing message ${index}: "${message.text.substring(0, 50)}..."`);
+      this.logger.debug(`Emotional intent: ${JSON.stringify(message.emotionalIntent)}`);
 
       // Generate audio
       const audioFilePath = await this.ttsService.textToSpeech(
@@ -55,15 +51,15 @@ export class ChatService {
       );
 
       // Generate lipsync
-      const lipsyncData = await this.lipsyncService.generateLipsync(audioFilePath);
+      const lipsyncData = await this.lipsyncService.generateLipsync(audioFilePath, message.text);
 
       // Convert audio to base64
       const audioBase64 = await this.lipsyncService.audioFileToBase64(audioFilePath);
 
       return {
         text: message.text,
-        facialExpression: message.facialExpression,
-        animation: message.animation,
+        emotionalIntent: message.emotionalIntent,
+        // metadata: message.metadata,
         audio: audioBase64,
         lipsync: lipsyncData,
       };
@@ -74,78 +70,29 @@ export class ChatService {
       // Return message without audio/lipsync on error
       return {
         text: message.text,
-        facialExpression: message.facialExpression,
-        animation: message.animation,
+        emotionalIntent: message.emotionalIntent,
+        // metadata: message.metadata,
       };
     }
   }
 
-  private async getDefaultMessages(): Promise<MessageDto[]> {
-    try {
-      // Try to use existing intro audio files if they exist
-      const introMessages = [
-        {
-          text: "Hey dear... How was your day?",
-          facialExpression: "smile" as const,
-          animation: "Talking_1" as const,
-          audioFile: "intro_0.wav",
-          lipsyncFile: "intro_0.json",
-        },
-        {
-          text: "I missed you so much... Please don't go for so long!",
-          facialExpression: "sad" as const,
-          animation: "Crying" as const,
-          audioFile: "intro_1.wav",
-          lipsyncFile: "intro_1.json",
-        },
-      ];
-
-      return Promise.all(
-        introMessages.map(async (msg) => {
-          try {
-            const audioBase64 = await this.lipsyncService.audioFileToBase64(
-              path.join('audios', msg.audioFile)
-            );
-            const lipsyncData = JSON.parse(
-              await fs.readFile(path.join('audios', msg.lipsyncFile), 'utf8')
-            );
-
-            return {
-              text: msg.text,
-              facialExpression: msg.facialExpression,
-              animation: msg.animation,
-              audio: audioBase64,
-              lipsync: lipsyncData,
-            };
-          } catch (error) {
-            // Return without audio/lipsync if files don't exist
-            return {
-              text: msg.text,
-              facialExpression: msg.facialExpression,
-              animation: msg.animation,
-            };
-          }
-        })
-      );
-
-    } catch (error) {
-      // Fallback to simple text messages
-      return [
-        {
-          text: "Hey dear... How was your day?",
-          facialExpression: "smile",
-          animation: "Talking_1",
-        },
-      ];
-    }
-  }
+  
 
   private async getErrorMessages(): Promise<MessageDto[]> {
     return [
       {
-        text: "Oh no! Something went wrong on my end. Can you try again?",
-        facialExpression: "sad",
-        animation: "Crying",
+        text: "Ôi, Hiện tại có lỗi nào đó xảy ra. Bạn có thể nói lại không?",
+        emotionalIntent: {
+          primary: EmotionType.CONFUSED,
+          intensity: 0.6,
+          context: ContextType.CASUAL,
+          duration: DurationType.BRIEF,
+        },
+        /* metadata: {
+          messageLength: 60,
+          estimatedDuration: 2500,
+          conversationTurn: 0,
+        }, */
       },
     ];
   }

@@ -4,6 +4,7 @@ import { exec } from 'child_process';
 import { promisify } from 'util';
 import * as fs from 'fs/promises';
 import * as path from 'path';
+import * as os from 'os';
 
 const execAsync = promisify(exec);
 
@@ -13,7 +14,7 @@ export class LipsyncService {
 
   constructor(private readonly configService: ConfigService) {}
 
-  async generateLipsync(audioFilePath: string, outputJsonPath?: string): Promise<any> {
+  async generateLipsync(audioFilePath: string, transcriptText?: string, outputJsonPath?: string ): Promise<any> {
     const fileName = path.basename(audioFilePath, path.extname(audioFilePath));
     const audiosDir = this.configService.get<string>('app.paths.audiosDir');
     const finalOutputPath = outputJsonPath || path.join(audiosDir, `${fileName}.json`);
@@ -28,7 +29,7 @@ export class LipsyncService {
       const wavFilePath = await this.ensureWavFormat(audioFilePath);
       
       // Generate lipsync using Rhubarb
-      await this.runRhubarb(wavFilePath, finalOutputPath);
+      await this.runRhubarb(wavFilePath, finalOutputPath, transcriptText);
       
       // Read and return the generated JSON
       const lipsyncData = await this.readLipsyncJson(finalOutputPath);
@@ -69,10 +70,22 @@ export class LipsyncService {
     }
   }
 
-  private async runRhubarb(wavFilePath: string, outputJsonPath: string): Promise<void> {
+  private async runRhubarb(wavFilePath: string, outputJsonPath: string, transcriptText?: string): Promise<void> {
     const rhubarbPath = this.configService.get<string>('app.paths.rhubarbPath');
     
-    const rhubarbCommand = `"${rhubarbPath}" -f json -o "${outputJsonPath}" "${wavFilePath}" -r phonetic`;
+    // Sử dụng thư mục temp của hệ thống thay vì /tmp
+    const tempDir = os.tmpdir();
+    const tempFile = path.join(tempDir, `transcript_${Date.now()}.txt`);
+
+    // Đảm bảo thư mục temp tồn tại
+    await fs.mkdir(tempDir, { recursive: true });
+
+    // Ghi text vào file tạm
+    await fs.writeFile(tempFile, transcriptText || '');
+    // Tốt nhất cho tiếng Việt
+    const rhubarbCommand = transcriptText 
+    ? `"${rhubarbPath}" -f json -o "${outputJsonPath}" "${wavFilePath}" -d "${tempFile}"`
+    : `"${rhubarbPath}" -f json -o "${outputJsonPath}" "${wavFilePath}"`;
     
     this.logger.debug(`Running Rhubarb command: ${rhubarbCommand}`);
     
@@ -90,17 +103,31 @@ export class LipsyncService {
     } catch (error) {
       this.logger.error(`Rhubarb execution failed: ${error.message}`);
       throw new Error(`Failed to generate lipsync: ${error.message}`);
+    } finally {
+      // Xóa file tạm một cách an toàn
+      try {
+        await fs.unlink(tempFile);
+      } catch (error) {
+        this.logger.warn(`Failed to delete temp file ${tempFile}: ${error.message}`);
+      }
     }
   }
 
   private async readLipsyncJson(jsonFilePath: string): Promise<any> {
     try {
       const jsonContent = await fs.readFile(jsonFilePath, 'utf8');
-      return JSON.parse(jsonContent);
+      const lipsyncData = JSON.parse(jsonContent);
+      return this.processLipsyncData(lipsyncData);
     } catch (error) {
       this.logger.error(`Failed to read lipsync JSON: ${error.message}`);
       throw new Error(`Failed to read lipsync data: ${error.message}`);
     }
+  }
+
+  // TODO: Check and update data visemes in the future
+  private processLipsyncData(lipsyncData: any): any {
+    delete lipsyncData.metadata.soundFile;
+    return lipsyncData;
   }
 
   async audioFileToBase64(filePath: string): Promise<string> {

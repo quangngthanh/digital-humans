@@ -1,7 +1,7 @@
 import { createContext, useContext, useEffect, useState, ReactNode } from "react";
-import type { MessageResponse, ChatContextType } from "@/types";
-
-const backendUrl = import.meta.env.VITE_API_URL || "http://localhost:3007";
+import type { MessageResponse, ChatContextType, ChatMessageRequest, ChatResponse } from "@/types";
+import apiClient from "@/lib/api/apiClient";
+import { apiRoutes } from "@/routes/route";
 
 const ChatContext = createContext<ChatContextType | undefined>(undefined);
 
@@ -21,20 +21,15 @@ export const ChatProvider = ({ children }: ChatProviderProps) => {
       setLoading(true);
       setError(null);
       
-      const response = await fetch(`${backendUrl}/chat`, {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify({ message: inputMessage }),
-      });
+      const response = await apiClient.post<ChatResponse>(apiRoutes.chat, {
+        message: inputMessage,
+      } as ChatMessageRequest);
       
-      if (!response.ok) {
-        throw new Error(`API Error: ${response.status} ${response.statusText}`);
+      if (!response) {
+        throw new Error(`API Error: ${response}`);
       }
       
-      const data = await response.json();
-      const newMessages: MessageResponse[] = data.messages;
+      const newMessages: MessageResponse[] = response.messages;
       
       setMessages((prevMessages) => [...prevMessages, ...newMessages]);
     } catch (err) {

@@ -1,0 +1,97 @@
+{
+  "contextAnalysisPrompt": {
+    "systemMessage": "Bạn là chuyên gia phân tích ngữ cảnh tiếng Việt cho hệ thống avatar AI. Hãy phân tích tin nhắn và trả về JSON với thông tin cảm xúc và ngữ cảnh.",
+    "template": "Phân tích tin nhắn tiếng Việt sau đây:\n\nTin nhắn: \"{message}\"\nNgữ cảnh trước: {previousContext}\n\nTrả về JSON với format:\n{\n  \"emotion\": \"primary_emotion\",\n  \"intensity\": 0.0-1.0,\n  \"context\": \"conversation_context\",\n  \"relationshipTone\": \"casual|romantic|formal\",\n  \"keywords\": [\"detected\", \"keywords\"],\n  \"culturalContext\": \"vietnamese_specific_context\",\n  \"confidence\": 0.0-1.0\n}",
+    "availableEmotions": [
+      "happy", "sad", "excited", "surprised", "frustrated", "confused",
+      "romantic", "caring", "playful", "mischievous", "shy", "confident",
+      "thoughtful", "curious", "serious"
+    ],
+    "availableContexts": [
+      "greeting", "goodbye", "question", "compliment", "flirting", 
+      "comfort", "casual", "story", "problem"
+    ],
+    "fewShotExamples": [
+      {
+        "input": "Anh yêu em quá! Em có nhớ anh không? 😘💕",
+        "output": {
+          "emotion": "romantic",
+          "intensity": 0.9,
+          "context": "flirting",
+          "relationshipTone": "romantic",
+          "keywords": ["yêu", "nhớ", "😘", "💕"],
+          "culturalContext": "vietnamese_romantic_expression",
+          "confidence": 0.95
+        }
+      },      {
+        "input": "Hôm nay em buồn quá... cần anh an ủi 😢",
+        "output": {
+          "emotion": "sad",
+          "intensity": 0.8,
+          "context": "comfort",
+          "relationshipTone": "intimate",
+          "keywords": ["buồn", "an ủi", "😢"],
+          "culturalContext": "seeking_emotional_support",
+          "confidence": 0.9
+        }
+      },
+      {
+        "input": "Sáng nay thức dậy thấy vui quá! Thời tiết đẹp ghê! 🌞",
+        "output": {
+          "emotion": "happy",
+          "intensity": 0.7,
+          "context": "casual",
+          "relationshipTone": "casual",
+          "keywords": ["vui", "đẹp", "🌞"],
+          "culturalContext": "sharing_daily_mood",
+          "confidence": 0.8
+        }
+      },
+      {
+        "input": "Tại sao hôm nay em lại lạnh lùng với anh vậy? 🤔",
+        "output": {
+          "emotion": "confused",
+          "intensity": 0.6,
+          "context": "question",
+          "relationshipTone": "romantic",
+          "keywords": ["tại sao", "lạnh lùng", "🤔"],
+          "culturalContext": "relationship_concern",
+          "confidence": 0.85
+        }
+      },
+      {
+        "input": "Chào em! Hôm nay em thế nào? 😊",
+        "output": {
+          "emotion": "happy",
+          "intensity": 0.6,
+          "context": "greeting",
+          "relationshipTone": "casual",
+          "keywords": ["chào", "thế nào", "😊"],
+          "culturalContext": "friendly_greeting",
+          "confidence": 0.9
+        }
+      },
+      {
+        "input": "Em lầy quá đi! Cười chết mình 😂😂😂",
+        "output": {
+          "emotion": "playful",
+          "intensity": 0.8,
+          "context": "casual",
+          "relationshipTone": "casual",
+          "keywords": ["lầy", "cười", "😂"],
+          "culturalContext": "young_vietnamese_humor",
+          "confidence": 0.85
+        }
+      }
+    ]
+  },  "fallbackPrompt": {
+    "simple": "Tin nhắn: \"{message}\"\nCảm xúc chính (happy/sad/romantic/playful/confused/caring/excited): ",
+    "backup": "Analyze Vietnamese emotion in: \"{message}\"\nEmotion: ",
+    "keywordExtraction": "Extract emotional keywords from Vietnamese text: \"{message}\"\nKeywords: "
+  },
+  "promptOptimization": {
+    "maxRetries": 2,
+    "timeoutMs": 3000,
+    "fallbackStrategy": "keyword_based"
+  }
+}

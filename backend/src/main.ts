@@ -1,9 +1,7 @@
 import { NestFactory } from '@nestjs/core';
-import { Logger, ValidationPipe } from '@nestjs/common';
+import { ValidationPipe, LogLevel } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
 import { DocumentBuilder, SwaggerModule } from '@nestjs/swagger';
-import { WinstonModule } from 'nest-winston';
-import * as winston from 'winston';
 import helmet from 'helmet';
 import rateLimit from 'express-rate-limit';
 
@@ -11,40 +9,16 @@ import { AppModule } from './app.module';
 import { AllExceptionsFilter } from './common/filters/all-exceptions.filter';
 
 async function bootstrap() {
-  // Create Winston logger instance
-  const logger = WinstonModule.createLogger({
-    transports: [
-      new winston.transports.Console({
-        format: winston.format.combine(
-          winston.format.timestamp(),
-          winston.format.colorize(),
-          winston.format.simple(),
-        ),
-      }),
-      new winston.transports.File({
-        filename: 'logs/error.log',
-        level: 'error',
-        format: winston.format.combine(
-          winston.format.timestamp(),
-          winston.format.json(),
-        ),
-      }),
-      new winston.transports.File({
-        filename: 'logs/combined.log',
-        format: winston.format.combine(
-          winston.format.timestamp(),
-          winston.format.json(),
-        ),
-      }),
-    ],
-  });
+  const isDevelopment = process.env.NODE_ENV !== 'production';
+  const logLevels: LogLevel[] = isDevelopment 
+    ? ['error', 'warn', 'log', 'debug', 'verbose']
+    : ['error', 'warn', 'log'];
 
-  // Create NestJS application
+
   const app = await NestFactory.create(AppModule, {
-    logger,
+    logger: logLevels
   });
 
-  // Get configuration service
   const configService = app.get(ConfigService);
   const port = configService.get<number>('app.port');
   const corsOptions = configService.get('app.cors');
@@ -52,7 +26,7 @@ async function bootstrap() {
 
   // Security middleware
   app.use(helmet({
-    contentSecurityPolicy: false, // Disable for development
+    contentSecurityPolicy: false,
   }));
 
   // CORS configuration
@@ -83,15 +57,14 @@ async function bootstrap() {
       disableErrorMessages: process.env.NODE_ENV === 'production',
     }),
   );
-
-  // Global exception filter
-  app.useGlobalFilters(new AllExceptionsFilter(logger as Logger));
+  
+  app.useGlobalFilters(new AllExceptionsFilter());
 
   // API versioning
   app.setGlobalPrefix('api/v1');
 
   // Swagger documentation
-  if (process.env.NODE_ENV !== 'production') {
+  if (isDevelopment) {
     const config = new DocumentBuilder()
       .setTitle('Digital Avatar Backend API')
       .setDescription('NestJS backend for Digital Avatar application')
@@ -108,13 +81,17 @@ async function bootstrap() {
   // Start the server
   await app.listen(port);
   
-  logger.log(`🚀 Digital Avatar NestJS Backend is running on port ${port}`, 'Bootstrap');
-  logger.log(`📋 Environment: ${process.env.NODE_ENV}`, 'Bootstrap');
-  logger.log(`📚 API Documentation: http://localhost:${port}/api/docs`, 'Bootstrap');
-  logger.log(`🔗 Health Check: http://localhost:${port}/api/v1/health`, 'Bootstrap');
+  // 🔹 SIMPLE: Use console.log for bootstrap messages (no logger dependency)
+  console.log(`🚀 Digital Avatar Backend running on port ${port}`);
+  console.log(`📋 Environment: ${process.env.NODE_ENV || 'development'}`);
+  console.log(`🔍 Log Levels: ${logLevels.join(', ')}`);
+  if (isDevelopment) {
+    console.log(`📚 API Docs: http://localhost:${port}/api/docs`);
+  }
+  console.log(`🔗 Health Check: http://localhost:${port}/api/v1/health`);
 }
 
 bootstrap().catch((error) => {
-  console.error('Failed to start application:', error);
+  console.error('❌ Failed to start application:', error);
   process.exit(1);
 });

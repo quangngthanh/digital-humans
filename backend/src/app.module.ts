@@ -1,7 +1,5 @@
-import { Module, Logger } from '@nestjs/common';
+import { Module } from '@nestjs/common';
 import { ConfigModule } from '@nestjs/config';
-import { WinstonModule } from 'nest-winston';
-import * as winston from 'winston';
 
 import configuration from './config/configuration';
 import { validationSchema } from './config/validation';
@@ -24,19 +22,6 @@ import { HealthController } from './common/controllers/health.controller';
         abortEarly: true,
       },
     }),
-    
-    // Winston logging module
-    WinstonModule.forRoot({
-      transports: [
-        new winston.transports.Console({
-          format: winston.format.combine(
-            winston.format.timestamp(),
-            winston.format.colorize(),
-            winston.format.simple(),
-          ),
-        }),
-      ],
-    }),
 
     // Feature modules
     ChatModule,
@@ -45,7 +30,8 @@ import { HealthController } from './common/controllers/health.controller';
     TtsModule,
     LipsyncModule,
   ],
-  controllers: [HealthController],
-  providers: [Logger],
+  controllers: [
+    HealthController,
+  ],
 })
 export class AppModule {}

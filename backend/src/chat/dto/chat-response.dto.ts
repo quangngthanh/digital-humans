@@ -1,6 +1,7 @@
-import { IsArray, IsString, IsIn, IsOptional, ValidateNested } from 'class-validator';
+import { IsArray, IsString, IsIn, IsOptional, ValidateNested, IsNumber } from 'class-validator';
 import { Type } from 'class-transformer';
 import { ApiProperty } from '@nestjs/swagger';
+import { EmotionalIntentDto } from './emotional-intent.dto';
 
 export class MessageDto {
   @ApiProperty({
@@ -11,22 +12,28 @@ export class MessageDto {
   text: string;
 
   @ApiProperty({
-    description: 'Facial expression for the avatar',
-    enum: ['smile', 'sad', 'angry', 'surprised', 'funnyFace', 'default'],
-    example: 'smile',
+    description: 'Emotional intent instead of specific facial expression',
+    type: EmotionalIntentDto,
   })
-  @IsString()
-  @IsIn(['smile', 'sad', 'angry', 'surprised', 'funnyFace', 'default'])
-  facialExpression: string;
+  @ValidateNested()
+  @Type(() => EmotionalIntentDto)
+  emotionalIntent: EmotionalIntentDto;
 
   @ApiProperty({
-    description: 'Animation for the avatar',
-    enum: ['Talking_0', 'Talking_1', 'Talking_2', 'Crying', 'Laughing', 'Rumba', 'Idle', 'Terrified', 'Angry'],
-    example: 'Talking_1',
+    description: 'Message metadata for frontend processing',
+    example: {
+      messageLength: 25,
+      estimatedDuration: 3000,
+      conversationTurn: 1
+    },
+    required: false,
   })
-  @IsString()
-  @IsIn(['Talking_0', 'Talking_1', 'Talking_2', 'Crying', 'Laughing', 'Rumba', 'Idle', 'Terrified', 'Angry'])
-  animation: string;
+  @IsOptional()
+  metadata?: {
+    messageLength: number;
+    estimatedDuration: number;
+    conversationTurn: number;
+  };
 
   @ApiProperty({
     description: 'Base64 encoded audio data',

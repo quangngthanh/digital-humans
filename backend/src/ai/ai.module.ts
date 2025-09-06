@@ -3,10 +3,16 @@ import { ConfigService } from '@nestjs/config';
 import { GoogleGenerativeAI } from '@google/generative-ai';
 
 import { AiService } from './ai.service';
+import { ContextAnalyzerService } from './context-analyzer.service';
+import { LLMContextAnalyzerService } from './llm-context-analyzer.service';
+import { ConfigLoaderService } from '../config/config-loader.service';
 
 @Module({
   providers: [
     AiService,
+    ContextAnalyzerService,
+    LLMContextAnalyzerService,
+    ConfigLoaderService,
     {
       provide: 'GEMINI_CLIENT',
       useFactory: (configService: ConfigService) => {
@@ -19,6 +25,6 @@ import { AiService } from './ai.service';
       inject: [ConfigService],
     },
   ],
-  exports: [AiService],
+  exports: [AiService, ContextAnalyzerService, LLMContextAnalyzerService, ConfigLoaderService],
 })
 export class AiModule {}

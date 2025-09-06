@@ -3,16 +3,37 @@ export interface ChatMessageRequest {
   message: string;
 }
 
+export interface EmotionalIntent {
+  primary: string;
+  intensity: number;
+  context: string;
+  duration?: string;
+  secondaryEmotion?: string;
+}
+
+export interface MessageMetadata {
+  messageLength: number;
+  estimatedDuration: number;
+  conversationTurn: number;
+}
+
 export interface MessageResponse {
   text: string;
-  facialExpression: 'smile' | 'sad' | 'angry' | 'surprised' | 'funnyFace' | 'default';
-  animation: 'Talking_0' | 'Talking_1' | 'Talking_2' | 'Crying' | 'Laughing' | 'Rumba' | 'Idle' | 'Terrified' | 'Angry';
+  emotionalIntent: EmotionalIntent;
+  metadata?: MessageMetadata;
   audio?: string;
   lipsync?: any;
 }
 
 export interface ChatResponse {
   messages: MessageResponse[];
+}
+
+export interface AvatarState {
+  expression: string;
+  animation: string;
+  transitionDuration: number;
+  blendingRatio?: number;
 }
 
 // Voice related types
