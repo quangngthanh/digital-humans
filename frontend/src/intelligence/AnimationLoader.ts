@@ -61,7 +61,7 @@ export class AnimationLoader {
               const clip = fbx.animations[0];
               clip.name = animationName;
               
-              // Optimize animation clip
+              // Optimize animation clip - CRITICAL FIX for camera issue
               this.optimizeClip(clip);
               
               console.log(`Successfully loaded animation: ${animationName}`);
@@ -89,11 +89,64 @@ export class AnimationLoader {
   }
   
   /**
-   * Optimize animation clip for better performance
+   * Optimize animation clip for better performance and filter unwanted tracks
+   * CRITICAL FIX: This prevents camera movement issues
    */
   private optimizeClip(clip: THREE.AnimationClip): void {
-    // Remove unused tracks
+    console.log(`🔍 Optimizing clip "${clip.name}" - Original tracks: ${clip.tracks.length}`);
+    
+    // DEBUG: Log all track names to identify problematic ones
+    console.log(`📋 All tracks in ${clip.name}:`);
+    clip.tracks.forEach((track, index) => {
+      console.log(`  ${index}: ${track.name} (${track.values.length} keyframes)`);
+    });
+    
+    // Filter out unwanted tracks that cause camera issues
     clip.tracks = clip.tracks.filter(track => {
+      // Remove tracks that affect cameras, scenes, or lights
+      if (track.name.includes('Camera') || 
+          track.name.includes('Scene') || 
+          track.name.includes('Light') ||
+          track.name.includes('Object3D') ||
+          track.name.includes('Default') ||
+          track.name.includes('RootNode') ||
+          track.name.includes('Root') ||
+          track.name.includes('Armature.position') ||
+          track.name.includes('Armature.rotation') ||
+          track.name.includes('Armature.quaternion') ||
+          track.name.includes('Armature.scale') ||
+          track.name.toLowerCase().includes('camera')) {
+        console.log(`⚠️ Filtering out unwanted track: ${track.name}`);
+        return false;
+      }
+      
+      // Only remove CONTAINER/ARMATURE transforms that affect camera/world position
+      // DO NOT remove bone animations - they are needed for avatar movement
+      const trackObject = track.name.split('.')[0];
+      
+      // Only filter out armature container transforms (not bone animations)
+      if (trackObject === 'Armature' && 
+          (track.name.includes('.position') || 
+           track.name.includes('.rotation') || 
+           track.name.includes('.quaternion') ||
+           track.name.includes('.scale'))) {
+        console.log(`⚠️ Filtering out armature transform track: ${track.name}`);
+        return false;
+      }
+      
+      // Filter out scene/root node transforms
+      if ((trackObject === 'Scene' || 
+           trackObject === 'RootNode' || 
+           trackObject === 'Root' ||
+           trackObject === '') && 
+          (track.name.includes('.position') || 
+           track.name.includes('.rotation') || 
+           track.name.includes('.quaternion') ||
+           track.name.includes('.scale'))) {
+        console.log(`⚠️ Filtering out scene/root transform track: ${track.name}`);
+        return false;
+      }
+      
       // Keep tracks that have meaningful changes
       if (track.values.length === 0) return false;
       
@@ -101,8 +154,22 @@ export class AnimationLoader {
       const firstValue = track.values[0];
       const hasVariation = track.values.some(value => Math.abs(value - firstValue) > 0.001);
       
-      return hasVariation;
+      if (!hasVariation) {
+        console.log(`⚠️ Filtering out static track: ${track.name}`);
+        return false;
+      }
+      
+      return true;
     });
+    
+    console.log(`✅ Optimized clip "${clip.name}" - Remaining tracks: ${clip.tracks.length}`);
+    
+    // Log remaining track names for debugging (only for reasonable numbers)
+    if (clip.tracks.length < 20) {
+      clip.tracks.forEach(track => {
+        console.log(`  📍 Track: ${track.name}`);
+      });
+    }
     
     // Optimize track data
     clip.tracks.forEach(track => {

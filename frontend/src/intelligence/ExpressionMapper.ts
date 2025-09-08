@@ -1,5 +1,5 @@
 import { EMOTION_GROUPS, ANIMATION_GROUPS, ExpressionGroup } from '@/constants/emotion-groups';
-import { facialExpressions } from '@/constant';
+import { facialExpressions } from '@/constants';
 import { AnimationCoordinator } from './AnimationCoordinator';
 
 export interface EmotionalIntent {

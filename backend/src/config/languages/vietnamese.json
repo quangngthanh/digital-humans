@@ -128,7 +128,7 @@
         "appropriateEmotions": ["happy", "curious", "thoughtful", "caring"]
       },
       "friend": {
-        "terms": ["bạn", "mình", "cậu", "tao/may"],
+        "terms": ["bạn", "mình", "cậu", "tao/mày"],
         "emotionMapping": "casual_friendly",
         "appropriateEmotions": ["playful", "happy", "excited", "caring", "frustrated"]
       },

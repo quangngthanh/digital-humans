@@ -8,7 +8,7 @@ function App() {
   return (
     <>
       <Loader />
-      <Leva/>
+      <Leva />
       <UI/>
       <Canvas 
         shadows 

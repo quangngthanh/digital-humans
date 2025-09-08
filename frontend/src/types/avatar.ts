@@ -46,3 +46,23 @@ export interface LipsyncData {
         value: string;
     }>;
 }
+
+export interface AnimationAction {
+    action: THREE.AnimationAction;
+    animation: string;
+    startTime: number;
+    duration: number;
+    weight: number;
+    crossfadeIn: number;
+    crossfadeOut: number;
+  }
+  
+  export interface SequenceStep {
+    animation: string;
+    startTime: number;
+    duration: number;
+    crossfadeIn: number;
+    crossfadeOut: number;
+    weight?: number;
+  }
+  

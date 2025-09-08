@@ -3,7 +3,8 @@ import { ApiTags, ApiOperation, ApiResponse, ApiBody } from '@nestjs/swagger';
 
 import { ChatService } from './chat.service';
 import { ChatMessageDto } from './dto/chat-message.dto';
-import { ChatResponseDto } from './dto/chat-response.dto';
+import { ChatResponseDto, MessageDto } from './dto/chat-response.dto';
+import msg from '@/data/message';
 
 @ApiTags('chat')
 @Controller('chat')
@@ -34,8 +35,9 @@ export class ChatController {
     
     this.logger.debug(`Received chat message: ${message?.substring(0, 50)}... (language: ${language})`);
     
-    const messages = await this.chatService.processMessage(message, language);
-    
+    // const messages = await this.chatService.processMessage(message, language);
+    // mock data from json
+    const messages = msg as MessageDto[]
     return { messages };
   }
 }

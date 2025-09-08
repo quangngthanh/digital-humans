@@ -22,7 +22,19 @@ export interface MessageResponse {
   emotionalIntent: EmotionalIntent;
   metadata?: MessageMetadata;
   audio?: string;
-  lipsync?: any;
+  lipsync?: LipSyncData;
+}
+
+export interface LipSyncData {
+  metadata: {
+    soundFile?: string;
+    duration: number;
+  };
+  mouthCues: {
+    start: number;
+    end: number;
+    value: string;
+  }[];
 }
 
 export interface ChatResponse {

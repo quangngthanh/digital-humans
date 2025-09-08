@@ -22,10 +22,8 @@ export class LipsyncService {
     try {
       this.logger.debug(`Starting lipsync generation for: ${audioFilePath}`);
       
-      // Check if input file exists
       await fs.access(audioFilePath);
       
-      // Convert MP3 to WAV if needed
       const wavFilePath = await this.ensureWavFormat(audioFilePath);
       
       // Generate lipsync using Rhubarb
@@ -50,7 +48,6 @@ export class LipsyncService {
       return audioFilePath;
     }
     
-    // Convert to WAV
     const baseName = path.basename(audioFilePath, ext);
     const wavFilePath = path.join(path.dirname(audioFilePath), `${baseName}.wav`);
     
@@ -73,16 +70,13 @@ export class LipsyncService {
   private async runRhubarb(wavFilePath: string, outputJsonPath: string, transcriptText?: string): Promise<void> {
     const rhubarbPath = this.configService.get<string>('app.paths.rhubarbPath');
     
-    // Sử dụng thư mục temp của hệ thống thay vì /tmp
     const tempDir = os.tmpdir();
     const tempFile = path.join(tempDir, `transcript_${Date.now()}.txt`);
 
-    // Đảm bảo thư mục temp tồn tại
     await fs.mkdir(tempDir, { recursive: true });
 
-    // Ghi text vào file tạm
     await fs.writeFile(tempFile, transcriptText || '');
-    // Tốt nhất cho tiếng Việt
+
     const rhubarbCommand = transcriptText 
     ? `"${rhubarbPath}" -f json -o "${outputJsonPath}" "${wavFilePath}" -d "${tempFile}"`
     : `"${rhubarbPath}" -f json -o "${outputJsonPath}" "${wavFilePath}"`;
@@ -104,7 +98,7 @@ export class LipsyncService {
       this.logger.error(`Rhubarb execution failed: ${error.message}`);
       throw new Error(`Failed to generate lipsync: ${error.message}`);
     } finally {
-      // Xóa file tạm một cách an toàn
+
       try {
         await fs.unlink(tempFile);
       } catch (error) {

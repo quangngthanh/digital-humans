@@ -1,4 +1,4 @@
-import { facialExpressions } from '@/constant';
+import { facialExpressions } from '@/constants';
 import type { EmotionalIntent } from '@/types';
 
 export interface TransitionState {
