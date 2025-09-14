@@ -1,7 +1,8 @@
 import { FacialExpressions, VisemeMapping } from "@/types/avatar";
 
 export const avatarModel = "/models/68bafcdfc11cea25ec03e4f1.glb";
-export const animationsModel = "/models/animations.glb";
+
+export * from './animations';
 
 /**
  * 🎭 COMPREHENSIVE FACIAL EXPRESSIONS LIBRARY

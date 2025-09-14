@@ -101,7 +101,7 @@ export class AnimationLoader {
       console.log(`  ${index}: ${track.name} (${track.values.length} keyframes)`);
     });
     
-    // Filter out unwanted tracks that cause camera issues
+    // Filter out unwanted tracks that cause rotation issues
     clip.tracks = clip.tracks.filter(track => {
       // Remove tracks that affect cameras, scenes, or lights
       if (track.name.includes('Camera') || 
@@ -111,27 +111,44 @@ export class AnimationLoader {
           track.name.includes('Default') ||
           track.name.includes('RootNode') ||
           track.name.includes('Root') ||
-          track.name.includes('Armature.position') ||
-          track.name.includes('Armature.rotation') ||
-          track.name.includes('Armature.quaternion') ||
-          track.name.includes('Armature.scale') ||
           track.name.toLowerCase().includes('camera')) {
-        console.log(`⚠️ Filtering out unwanted track: ${track.name}`);
         return false;
       }
       
-      // Only remove CONTAINER/ARMATURE transforms that affect camera/world position
-      // DO NOT remove bone animations - they are needed for avatar movement
+      // CRITICAL: More precise filtering for armature/root transforms
       const trackObject = track.name.split('.')[0];
+      const trackProperty = track.name.split('.').pop();
       
-      // Only filter out armature container transforms (not bone animations)
-      if (trackObject === 'Armature' && 
-          (track.name.includes('.position') || 
-           track.name.includes('.rotation') || 
-           track.name.includes('.quaternion') ||
-           track.name.includes('.scale'))) {
-        console.log(`⚠️ Filtering out armature transform track: ${track.name}`);
-        return false;
+      // Filter out armature container transforms that cause 90-degree rotation
+      // Only filter if it's the main armature container, not bone animations
+      if (trackObject === 'Armature') {
+        // Keep bone animations (they have specific bone names after Armature)
+        const parts = track.name.split('.');
+        if (parts.length > 2) {
+          // This is a bone animation, keep it
+          return true;
+        }
+        
+        // This is armature container transform - analyze if it causes rotation
+        if (trackProperty === 'quaternion') {
+          // Check if this quaternion track has significant rotation
+          const hasSignificantRotation = this.hasSignificantRotation(track);
+          if (hasSignificantRotation) {
+            console.log(`⚠️ Filtering out armature quaternion with significant rotation: ${track.name}`);
+            return false;
+          } else {
+            console.log(`✅ Keeping armature quaternion (minimal rotation): ${track.name}`);
+            return true;
+          }
+        }
+        
+        // Filter out other armature container transforms
+        if (trackProperty === 'position' || 
+            trackProperty === 'rotation' || 
+            trackProperty === 'scale') {
+          console.log(`⚠️ Filtering out armature container transform: ${track.name}`);
+          return false;
+        }
       }
       
       // Filter out scene/root node transforms
@@ -139,10 +156,10 @@ export class AnimationLoader {
            trackObject === 'RootNode' || 
            trackObject === 'Root' ||
            trackObject === '') && 
-          (track.name.includes('.position') || 
-           track.name.includes('.rotation') || 
-           track.name.includes('.quaternion') ||
-           track.name.includes('.scale'))) {
+          (trackProperty === 'position' || 
+           trackProperty === 'rotation' || 
+           trackProperty === 'quaternion' ||
+           trackProperty === 'scale')) {
         console.log(`⚠️ Filtering out scene/root transform track: ${track.name}`);
         return false;
       }
@@ -164,7 +181,7 @@ export class AnimationLoader {
     
     console.log(`✅ Optimized clip "${clip.name}" - Remaining tracks: ${clip.tracks.length}`);
     
-    // Log remaining track names for debugging (only for reasonable numbers)
+    // Log remaining track names for debugging
     if (clip.tracks.length < 20) {
       clip.tracks.forEach(track => {
         console.log(`  📍 Track: ${track.name}`);
@@ -178,6 +195,41 @@ export class AnimationLoader {
     
     // Trim clip duration if needed
     clip.trim();
+  }
+  
+  /**
+   * Check if a quaternion track has significant rotation that could cause camera issues
+   */
+  private hasSignificantRotation(track: THREE.KeyframeTrack): boolean {
+    if (track.values.length < 2) return false;
+    
+    // For quaternion tracks, check if there's significant rotation
+    // Quaternion values are [x, y, z, w] for each keyframe
+    const quaternionCount = track.values.length / 4;
+    
+    if (quaternionCount < 2) return false;
+    
+    // Get first and last quaternion
+    const firstQuat = new THREE.Quaternion(
+      track.values[0], track.values[1], track.values[2], track.values[3]
+    );
+    const lastQuat = new THREE.Quaternion(
+      track.values[track.values.length - 4], 
+      track.values[track.values.length - 3], 
+      track.values[track.values.length - 2], 
+      track.values[track.values.length - 1]
+    );
+    
+    // Calculate the rotation difference
+    const rotationDiff = firstQuat.clone().invert().multiply(lastQuat);
+    const angle = 2 * Math.acos(Math.abs(rotationDiff.w));
+    
+    // If rotation is more than 5 degrees, consider it significant
+    const significantRotation = angle > (5 * Math.PI / 180);
+    
+    console.log(`🔍 Quaternion rotation analysis for ${track.name}: ${(angle * 180 / Math.PI).toFixed(2)}° (significant: ${significantRotation})`);
+    
+    return significantRotation;
   }
   
   /**

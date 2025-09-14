@@ -30,7 +30,6 @@ export class EnhancedAnimationManager {
   // Timeline sync
   private audioElement: HTMLAudioElement | null = null;
   private syncMode: 'none' | 'audio' | 'timeline' = 'none';
-  private lastUpdateTime: number = 0;
   
   // Callbacks
   private callbacks: AnimationManagerCallbacks;
