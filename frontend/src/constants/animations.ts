@@ -1,16 +1,13 @@
 // Animation configurations
 export const ANIMATION_CONFIG = {
-  // Idle animations (will be played randomly when not speaking)
+  // Idle animations with loop configurations
   idleAnimations: [
-    'Looking', 
-    'Walking', 
-    'SadIdle',
-    'DrawfIdle',
-    'BreathingIdle',
+    { name: 'BreathingIdle', loop: 8 }, 
+    { name: 'Idle', loop: 3 }, 
   ],
   
   // Default idle animation (played during delay periods)
-  defaultIdleAnimation: 'BreathingIdle',
+  defaultIdleAnimation: 'Idle',
   
   // Talking animations (used during speech)
   talkingAnimations: [
@@ -41,3 +38,11 @@ export const ANIMATION_CONFIG = {
 
 export type AnimationName = string;
 export type EmotionType = keyof typeof ANIMATION_CONFIG.emotionalAnimations;
+
+// Types for idle animation configuration
+export type IdleAnimationConfig = {
+  name: AnimationName;
+  loop: boolean | number; // true = infinite, number = specific count
+};
+
+export type AnimationConfig = typeof ANIMATION_CONFIG;

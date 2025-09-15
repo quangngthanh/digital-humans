@@ -18,6 +18,7 @@ function getAllGlbFiles(): string[] {
     '/animations/SadIdle.glb',
     '/animations/DrawfIdle.glb',
     '/animations/BreathingIdle.glb',
+    '/animations/Idle.glb',
   ];
 }
 

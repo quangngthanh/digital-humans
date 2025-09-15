@@ -1,6 +1,6 @@
 import { useCallback, useRef, useState, useEffect } from 'react';
 import * as THREE from 'three';
-import { ANIMATION_CONFIG, type AnimationName } from '@/constants/animations';
+import { ANIMATION_CONFIG, type AnimationName, type IdleAnimationConfig } from '@/constants/animations';
 import { logger } from '@/utils/logger';
 
 export type AnimationState = 'idle' | 'talking' | 'playing';
@@ -11,7 +11,7 @@ export interface UseAnimationsProps {
 }
 
 export interface AnimationControls {
-  playAnimation: (name: AnimationName, loop?: boolean) => boolean;
+  playAnimation: (name: AnimationName, loop?: boolean | number) => boolean;
   playTalkingAnimation: () => void;
   startIdleSystem: () => void;
   stopIdleSystem: () => void;
@@ -19,10 +19,6 @@ export interface AnimationControls {
   getCurrentState: () => AnimationState;
   getCurrentAnimation: () => AnimationName | null;
   updateMixer: (delta: number) => void;
-  // ✅ Debug function to test animation playback
-  debugAnimation: (name: AnimationName) => void;
-  // ✅ Function to adjust animation speed
-  setTimeScale: (scale: number) => void;
 }
 
 export function useAnimations({ animations, group }: UseAnimationsProps): AnimationControls {
@@ -65,7 +61,7 @@ export function useAnimations({ animations, group }: UseAnimationsProps): Animat
   }, [animations, group]);
 
   // Play specific animation
-  const playAnimation = useCallback((name: AnimationName, loop: boolean = false): boolean => {
+  const playAnimation = useCallback((name: AnimationName, loop: boolean | number = false): boolean => {
     logger.animationStart(name);
     
     const currentMixer = getMixer();
@@ -81,14 +77,6 @@ export function useAnimations({ animations, group }: UseAnimationsProps): Animat
       return false;
     }
 
-    // ✅ Debug: Log animation clip details
-    logger.debug(`🎬 Animation Clip Details:`, {
-      name: clip.name,
-      duration: clip.duration,
-      tracks: clip.tracks.length,
-      loop: loop
-    });
-
     try {
       // Stop current action
       if (currentAction.current) {
@@ -98,28 +86,15 @@ export function useAnimations({ animations, group }: UseAnimationsProps): Animat
       // Create and configure new action
       const action = currentMixer.clipAction(clip);
       action.reset();
-      action.setLoop(loop ? THREE.LoopRepeat : THREE.LoopOnce, loop ? Infinity : 1);
-      // ✅ Fix: Don't clamp when finished for non-looping animations to allow full playback
-      action.clampWhenFinished = loop; // Only clamp for looping animations
       
-      // ✅ Ensure proper time scale for full animation playback
-      action.timeScale = 1.0; // Normal speed
-      
-      // ✅ Ensure animation plays from start to end
-      action.time = 0; // Start from beginning
-      action.enabled = true; // Ensure action is enabled
-      
-      // ✅ Debug: Log action configuration
-      logger.debug(`⚙️ Action Configuration:`, {
-        loop: loop,
-        loopCount: loop ? Infinity : 1,
-        clampWhenFinished: action.clampWhenFinished,
-        timeScale: action.timeScale,
-        enabled: action.enabled,
-        startTime: action.time,
-        expectedDuration: clip.duration,
-        adjustedDuration: clip.duration / action.timeScale // Expected actual duration
-      });
+      // Handle different loop configurations
+      if (typeof loop === 'boolean') {
+        action.setLoop(loop ? THREE.LoopRepeat : THREE.LoopOnce, loop ? Infinity : 1);
+      } else if (typeof loop === 'number') {
+        action.setLoop(THREE.LoopRepeat, loop);
+      } else {
+        action.setLoop(THREE.LoopOnce, 1);
+      }
       
       // Fade in new animation
       if (currentAction.current) {
@@ -134,27 +109,19 @@ export function useAnimations({ animations, group }: UseAnimationsProps): Animat
       currentAnimationName.current = name;
       setAnimationState('playing');
 
-      // Set up completion handler for non-looping animations
-      if (!loop) {
-        const startTime = Date.now();
+      // Set up completion handler for non-looping and finite loop animations
+      const shouldSetCompletionHandler = typeof loop === 'boolean' ? !loop : (typeof loop === 'number' && loop >= 1);
+      if (shouldSetCompletionHandler) {
         const onFinished = () => {
-          const actualDuration = Date.now() - startTime;
-          logger.debug(`🏁 Animation Finished:`, {
-            name: name,
-            expectedDuration: clip.duration * 1000, // Convert to ms
-            actualDuration: actualDuration,
-            durationDiff: actualDuration - (clip.duration * 1000)
-          });
-          
           if (currentAnimationName.current === name) {
             setAnimationState('idle');
-            // ✅ Simplified: Just trigger idle system after animation finishes
             setTimeout(() => {
               if (animationStateRef.current === 'idle') {
                 startIdleSystem();
               }
-            }, 100); // Small delay to ensure state is updated
+            }, 100);
           }
+
           currentMixer.removeEventListener('finished', onFinished);
         };
         currentMixer.addEventListener('finished', onFinished);
@@ -166,7 +133,7 @@ export function useAnimations({ animations, group }: UseAnimationsProps): Animat
       logger.animationError(name, error);
       return false;
     }
-  }, [animations, getMixer]); // ✅ Remove startIdleSystem from dependencies
+  }, [animations, getMixer]);
 
   // Play random talking animation
   const playTalkingAnimation = useCallback(() => {
@@ -182,37 +149,45 @@ export function useAnimations({ animations, group }: UseAnimationsProps): Animat
 
   // Start idle animation system
   const startIdleSystem = useCallback(() => {
-    // ✅ Don't start idle system if not in idle state
     if (animationState !== 'idle') {
-      logger.debug(`Skipping idle system - State: ${animationState}`);
       return;
     }
     
     const playRandomIdle = () => {
-      const idleAnims = ANIMATION_CONFIG.idleAnimations;
-      const randomAnimation = idleAnims[Math.floor(Math.random() * idleAnims.length)];
-      // ✅ Fix: Play idle animations as looping to prevent interruption
-      const success = playAnimation(randomAnimation, true); // Looping
+      const idleAnims = ANIMATION_CONFIG.idleAnimations as readonly IdleAnimationConfig[];
+      const randomConfig = idleAnims[Math.floor(Math.random() * idleAnims.length)];
+      const animationName = randomConfig.name;
+      const loopConfig = randomConfig.loop;
+      
+      const success = playAnimation(animationName, loopConfig);
       
       if (success) {
-        logger.idleStart(randomAnimation);
+        logger.idleStart(animationName);
         
-        // ✅ Schedule next idle animation after a random duration
-        const nextIdleDelay = Math.random() * 
-          (ANIMATION_CONFIG.timing.idleMaxDuration - ANIMATION_CONFIG.timing.idleMinDuration) +
-          ANIMATION_CONFIG.timing.idleMinDuration;
-        
-        idleTimer.current = setTimeout(() => {
-          if (animationStateRef.current === 'idle') {
-            playRandomIdle(); // Play next random idle animation
-          }
-        }, nextIdleDelay);
+        // ✅ Set up timer for infinite loops only (finite loops use completion handler)
+        if (typeof loopConfig === 'number' && loopConfig > 1) {
+          logger.debug(`🔄 Finite loop animation: ${animationName} (${loopConfig} times)`);
+          // Finite loops will be handled by completion handler in playAnimation
+        } else if (typeof loopConfig === 'boolean' && loopConfig) {
+          logger.debug(`🔄 Infinite loop animation: ${animationName}`);
+          logger.debug(`🔄 Infinite loopConfig: ${loopConfig}`);
+          // Infinite loop - use random duration
+          const delay = Math.random() * 
+            (ANIMATION_CONFIG.timing.idleMaxDuration - ANIMATION_CONFIG.timing.idleMinDuration) +
+            ANIMATION_CONFIG.timing.idleMinDuration;
+          
+          idleTimer.current = setTimeout(() => {
+            if (animationStateRef.current === 'idle') {
+              playRandomIdle();
+            }
+          }, delay);
+        }
       }
     };
 
     // Play first idle animation immediately
     playRandomIdle();
-    logger.info('😴 Idle animation system started');
+
   }, [playAnimation, animationState]);
 
   // Stop idle animation system
@@ -238,9 +213,11 @@ export function useAnimations({ animations, group }: UseAnimationsProps): Animat
 
   // Get current state
   const getCurrentState = useCallback(() => animationState, [animationState]);
-  
+  console.log('getCurrentState', getCurrentState());
+
   // Get current animation name
   const getCurrentAnimation = useCallback(() => currentAnimationName.current, []);
+  console.log('getCurrentAnimation', getCurrentAnimation());
 
   // Update mixer in animation frame
   const updateMixer = useCallback((delta: number) => {
@@ -249,42 +226,6 @@ export function useAnimations({ animations, group }: UseAnimationsProps): Animat
     }
   }, []);
 
-  // ✅ Debug function to test animation playback
-  const debugAnimation = useCallback((name: AnimationName) => {
-    logger.debug(`🔍 Debug Animation: ${name}`);
-    
-    const clip = animations.find(anim => anim.name === name);
-    if (!clip) {
-      logger.warn(`Animation "${name}" not found`);
-      return;
-    }
-    
-    logger.debug(`📊 Animation Analysis:`, {
-      name: clip.name,
-      duration: clip.duration,
-      tracks: clip.tracks.length,
-      trackNames: clip.tracks.map(track => track.name),
-      totalKeyframes: clip.tracks.reduce((sum, track) => sum + track.times.length, 0)
-    });
-    
-    // Test playback
-    const success = playAnimation(name, false);
-    if (success) {
-      logger.info(`✅ Debug playback started for: ${name}`);
-    } else {
-      logger.error(`❌ Debug playback failed for: ${name}`);
-    }
-  }, [animations, playAnimation]);
-
-  // ✅ Function to adjust animation speed
-  const setTimeScale = useCallback((scale: number) => {
-    if (currentAction.current) {
-      currentAction.current.timeScale = scale;
-      logger.info(`⚙️ TimeScale changed to: ${scale}`);
-    } else {
-      logger.warn('No active animation to adjust timeScale');
-    }
-  }, []);
 
   // Cleanup on unmount
   useEffect(() => {
@@ -300,17 +241,6 @@ export function useAnimations({ animations, group }: UseAnimationsProps): Animat
   useEffect(() => {
     animationStateRef.current = animationState;
   }, [animationState]);
-
-  // ✅ Debug: Log all loaded animations
-  useEffect(() => {
-    if (animations.length > 0) {
-      logger.debug(`📋 All Loaded Animations:`, animations.map(anim => ({
-        name: anim.name,
-        duration: anim.duration,
-        tracks: anim.tracks.length
-      })));
-    }
-  }, [animations]);
 
   // Start idle system when animations are loaded
   useEffect(() => {
@@ -328,7 +258,5 @@ export function useAnimations({ animations, group }: UseAnimationsProps): Animat
     getCurrentState,
     getCurrentAnimation,
     updateMixer,
-    debugAnimation,
-    setTimeScale,
   };
 }

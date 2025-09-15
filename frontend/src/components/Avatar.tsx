@@ -49,17 +49,6 @@ export function Avatar(props: AvatarProps) {
     return controls;
   });
 
-  useControls("Debug Animations", () => {
-    const controls: Record<string, any> = {};
-    
-    animations.forEach(anim => {
-      controls[`Debug ${anim.name}`] = button(() => {
-        animationControls.debugAnimation(anim.name);
-      });
-    });
-    
-    return controls;
-  });
 
   useControls("Facial Controls", {
     blink: button(() => {
