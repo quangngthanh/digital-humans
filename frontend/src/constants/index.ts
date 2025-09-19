@@ -1,27 +1,9 @@
-import { FacialExpressions, VisemeMapping } from "@/types/avatar";
+import { FacialExpressions } from "@/types/avatar";
 
 export const avatarModel = "/models/68bafcdfc11cea25ec03e4f1.glb";
 
 export * from './animations';
 
-/**
- * 🎭 COMPREHENSIVE FACIAL EXPRESSIONS LIBRARY
- * 
- * Featuring 60+ scientifically-based facial expressions using Ready Player Me ARKit blend shapes
- * Organized by emotion categories with optimized morph target values
- * 
- * Categories:
- * - Basic Emotions (7) - Primary human emotions
- * - Eye Expressions (12) - Eye movements and states  
- * - Brow Expressions (8) - Eyebrow positions and movements
- * - Mouth Expressions (15) - Mouth shapes and movements
- * - Cheek Expressions (4) - Cheek deformations
- * - Complex Emotions (12) - Advanced emotional states
- * - Social Expressions (8) - Social interaction expressions
- * - Cognitive States (6) - Thinking and concentration
- * - Physical States (5) - Pain, tiredness, discomfort
- * - Micro Expressions (8) - Subtle facial changes
- */
 export const facialExpressions: FacialExpressions = {
   /** Neutral/rest state - completely relaxed face */
   default: {},
@@ -985,63 +967,6 @@ export const facialExpressions: FacialExpressions = {
 };
 
 /**
- * 👄 COMPREHENSIVE RHUBARB LIP SYNC MAPPING
- * 
- * Maps Rhubarb's 9 mouth shapes (A-H, X) to Ready Player Me's Oculus visemes
- * Based on official documentation and phonetic analysis
- * 
- * References:
- * - Rhubarb: https://github.com/DanielSWolf/rhubarb-lip-sync
- * - Ready Player Me: https://docs.readyplayer.me/ready-player-me/api-reference/avatars/morph-targets/oculus-ovr-libsync
- */
-export const corresponding: VisemeMapping = {
-  /** 🅰️ Closed mouth for P, B, M sounds - bilabial closure with slight pressure */
-  A: "viseme_PP",
-  
-  /** 🅱️ Clenched teeth for consonants K, S, T, etc. - mouth slightly open */
-  B: "viseme_kk",
-  
-  /** 🅲 Open mouth for EH, AE vowels - medium opening for transitions */
-  C: "viseme_I",
-  
-  /** 🅳 Wide open mouth for AA vowels - maximum jaw opening */
-  D: "viseme_aa",
-  
-  /** 🅴 Rounded mouth for AO, ER vowels - slight rounding for back vowels */
-  E: "viseme_O",
-  
-  /** 🅵 Puckered lips for UW, OW, W sounds - lips pushed forward */
-  F: "viseme_U",
-  
-  /** 🅶 Teeth on lip for F, V sounds - labiodental contact (optional) */
-  G: "viseme_FF",
-  
-  /** 🅷 Tongue raised for L sounds - dental/alveolar position (optional) */
-  H: "viseme_TH",
-  
-  /** ❌ Silence/rest position - relaxed mouth during pauses (optional) */
-  X: "viseme_sil",
-};
-
-/**
- * 🔄 ALTERNATIVE VISEME MAPPING
- * 
- * Alternative mapping for different animation styles or voice characteristics
- */
-export const corresponding2: VisemeMapping = {
-  A: "viseme_PP",  // Keep bilabial
-  B: "viseme_SS",  // Use sibilant for teeth clenching
-  C: "viseme_E",   // Use mid vowel instead
-  D: "viseme_aa",  // Keep wide open
-  E: "viseme_O",   // Keep rounded
-  F: "viseme_U",   // Keep puckered
-  G: "viseme_FF",  // Keep labiodental
-  H: "viseme_nn",  // Use nasal instead of dental
-  X: "viseme_sil", // Keep silence
-};
-
-
-/**
  * 📂 EXPRESSION CATEGORIES
  * 
  * Organized groupings for easy navigation and selection
@@ -1698,8 +1623,6 @@ export const presets = {
 // Final export statement to ensure everything is properly exported
 export default {
   facialExpressions,
-  corresponding,
-  corresponding2,
   expressionCategories,
   emotionIntensities,
   expressionTimings,

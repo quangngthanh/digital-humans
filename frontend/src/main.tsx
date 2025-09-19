@@ -1,7 +1,7 @@
 import React from "react";
 import ReactDOM from "react-dom/client";
 import App from "./App";
-import { ChatProvider } from "@/hooks/useChat";
+import { ChatProvider } from "@/hooks/useChatContext";
 import { suppressThreeJSWarnings } from "@/utils/logger";
 import "./index.css";
 

@@ -3,7 +3,7 @@ export const ANIMATION_CONFIG = {
   // Idle animations with loop configurations
   idleAnimations: [
     { name: 'BreathingIdle', loop: 8 }, 
-    { name: 'Idle', loop: 3 }, 
+    { name: 'Looking', loop: 3 }, 
   ],
   
   // Default idle animation (played during delay periods)

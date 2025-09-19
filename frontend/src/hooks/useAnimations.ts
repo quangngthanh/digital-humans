@@ -163,8 +163,6 @@ export function useAnimations({ animations, group }: UseAnimationsProps): Animat
       
       if (success) {
         logger.idleStart(animationName);
-        
-        // ✅ Set up timer for infinite loops only (finite loops use completion handler)
         if (typeof loopConfig === 'number' && loopConfig > 1) {
           logger.debug(`🔄 Finite loop animation: ${animationName} (${loopConfig} times)`);
           // Finite loops will be handled by completion handler in playAnimation

@@ -11,14 +11,13 @@ interface ChatProviderProps {
 
 export const ChatProvider = ({ children }: ChatProviderProps) => {
   const [messages, setMessages] = useState<MessageResponse[]>([]);
-  const [message, setMessage] = useState<MessageResponse | null>(null);
-  const [loading, setLoading] = useState<boolean>(false);
+  const [isLoading, setIsLoading] = useState<boolean>(false);
   const [cameraZoomed, setCameraZoomed] = useState<boolean>(true);
   const [error, setError] = useState<string | null>(null);
 
-  const chat = async (inputMessage: string): Promise<void> => {
+  const sendMessage = async (inputMessage: string): Promise<void> => {
     try {
-      setLoading(true);
+      setIsLoading(true);
       setError(null);
       
       const response = await apiClient.post<ChatResponse>(apiRoutes.chat, {
@@ -31,19 +30,18 @@ export const ChatProvider = ({ children }: ChatProviderProps) => {
       
       const newMessages: MessageResponse[] = response.messages;
       
-      setMessages((prevMessages) => [...prevMessages, ...newMessages]);
+      setMessages(newMessages);
     } catch (err) {
       const errorMessage = err instanceof Error ? err.message : 'An unknown error occurred';
       setError(errorMessage);
       console.error('Chat error:', err);
     } finally {
-      setLoading(false);
+      setIsLoading(false);
     }
   };
 
   const clearMessages = (): void => {
     setMessages([]);
-    setMessage(null);
     setError(null);
   };
 
@@ -51,40 +49,26 @@ export const ChatProvider = ({ children }: ChatProviderProps) => {
     setMessages((prevMessages) => prevMessages.slice(1));
   };
 
-  useEffect(() => {
-    if (messages.length > 0) {
-      setMessage(messages[0]);
-    } else {
-      setMessage(null);
-    }
-  }, [messages]);
 
   const contextValue: ChatContextType = {
     messages,
-    isLoading: loading,
+    isLoading,
     error,
-    sendMessage: chat,
+    sendMessage,
     clearMessages,
-  };
-
-  // Additional context for UI components
-  const extendedContextValue = {
-    ...contextValue,
-    message,
     onMessagePlayed,
-    loading,
     cameraZoomed,
     setCameraZoomed,
   };
 
   return (
-    <ChatContext.Provider value={extendedContextValue as any}>
+    <ChatContext.Provider value={contextValue}>
       {children}
     </ChatContext.Provider>
   );
 };
 
-export const useChat = () => {
+export const useChatContext = () => {
   const context = useContext(ChatContext);
   if (!context) {
     throw new Error("useChat must be used within a ChatProvider");

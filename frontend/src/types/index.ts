@@ -95,6 +95,9 @@ export interface ChatContextType {
   error: string | null;
   sendMessage: (message: string) => Promise<void>;
   clearMessages: () => void;
+  onMessagePlayed: () => void;
+  cameraZoomed: boolean;
+  setCameraZoomed: (cameraZoomed: boolean) => void;
 }
 
 // Three.js / React Three Fiber types

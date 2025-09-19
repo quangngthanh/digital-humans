@@ -7,68 +7,103 @@ import { useAnimations } from "@/hooks/useAnimations";
 import { useMorphTargets } from "@/hooks/useMorphTargets";
 import { useBlinkSystem } from "@/hooks/useBlinkSystem";
 import { useLoadAnimations } from "@/hooks/useLoadAnimations";
+import { useAvatarSpeech } from "@/hooks/useAvatarSpeech";
 
 import type { AvatarProps } from "@/types";
 import { avatarModel } from "@/constants";
 import { GLTFResult } from "@/types/avatar";
 import { useFrame } from "@react-three/fiber";
+import { useChatContext } from "@/hooks/useChatContext";
 
 export function Avatar(props: AvatarProps) {
   const gltfData = useGLTF(avatarModel) as GLTFResult;   
   const { nodes, materials, scene } = gltfData;
-  
+
   const { 
-    animations, 
+    animations
   } = useLoadAnimations();
     
   const group = useRef<THREE.Group>(null);
-  
-  
+  const morphTargetControls = useMorphTargets(scene);
+  const { animateBlink } = morphTargetControls;
+
+  useBlinkSystem(animateBlink);
+
+  const {sendMessage, messages, onMessagePlayed} = useChatContext();
+
   const animationControls = useAnimations({ 
     animations, 
     group 
   });
+  // Initialize avatar speech system with animation integration
+  const speechControls = useAvatarSpeech(messages, morphTargetControls, onMessagePlayed, {
+    playTalkingAnimation: animationControls.playTalkingAnimation,
+    stopAllAnimations: animationControls.stopAllAnimations
+  });
   
-  const morphTargetControls = useMorphTargets(scene);
-  const { animateBlink } = morphTargetControls;
+  console.log('speech state:', speechControls.state);
   
-  useBlinkSystem(animateBlink);
+ 
+  
+  // Initialize idle animation system after speechControls
+  // const idleControls = useIdleSystem(morphTargetControls, speechControls.state.isPlaying, {
+  //   interval: [4, 10], // 4-10 seconds between idle animations
+  //   enabled: true
+  // });
   
   const [avatarPosition] = useState<[number, number, number]>([0, -0.5, -2.4]);
   const [avatarScale] = useState<[number, number, number]>([1.5, 1.5, 1.5]);
   
-  useControls("Available Animations", () => {
-    const controls: Record<string, any> = {};
+  // useControls("Available Animations", () => {
+  //   const controls: Record<string, any> = {};
     
-    animations.forEach(anim => {
-      controls[anim.name] = button(() => {
-        animationControls.playAnimation(anim.name);
-      });
-    });
+  //   animations.forEach(anim => {
+  //     controls[anim.name] = button(() => {
+  //       animationControls.playAnimation(anim.name);
+  //     });
+  //   });
     
-    return controls;
-  });
-
+  //   return controls;
+  // });
 
   useControls("Facial Controls", {
-    blink: button(() => {
-      morphTargetControls.animateBlink();
+    testChat: button(() => {
+      sendMessage('Hello, em có khỏe không ?');
     }),
-    winkLeft: button(() => {
-      morphTargetControls.animateWink('left');
+    // debugMorphTargets: button(() => {
+    //   // Debug available morph targets
+    //   scene?.traverse((child) => {
+    //     const mesh = child as unknown as THREE.SkinnedMesh;
+    //     if (mesh.isSkinnedMesh && mesh.morphTargetDictionary) {
+    //       console.log(`${mesh.name} morph targets:`, Object.keys(mesh.morphTargetDictionary));
+    //     }
+    //   });
+    // }),
+    testViseme: button(() => {
+      // Test a specific viseme
+      morphTargetControls.setMorphTarget('viseme_aa', 1);
+      setTimeout(() => morphTargetControls.setMorphTarget('viseme_aa', 0), 1000);
     }),
-    winkRight: button(() => {
-      morphTargetControls.animateWink('right');
-    }),
-    resetFace: button(() => {
-      morphTargetControls.resetAllMorphTargets();
-    }),
+    // stopSpeech: button(() => {
+    //   speechControls.stop();
+    // }),
+    // blink: button(() => {
+    //   morphTargetControls.animateBlink();
+    // }),
+    // winkLeft: button(() => {
+    //   morphTargetControls.animateWink('left');
+    // }),
+    // winkRight: button(() => {
+    //   morphTargetControls.animateWink('right');
+    // }),
+    // resetFace: button(() => {
+    //   morphTargetControls.resetAllMorphTargets();
+    // }),
   });
   
   // Animation frame update
   useFrame((_, delta) => {
     try {
-      // Update animation mixer
       if (animationControls.updateMixer) {
         animationControls.updateMixer(delta);
       }

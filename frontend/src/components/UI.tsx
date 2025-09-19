@@ -1,5 +1,5 @@
 import { useRef, KeyboardEvent } from "react";
-import { useChat } from "@/hooks/useChat";
+import { useChatContext } from "@/hooks/useChatContext";
 
 interface UIProps {
   hidden?: boolean;
@@ -8,10 +8,10 @@ interface UIProps {
 
 export const UI = ({ hidden }: UIProps) => {
   const input = useRef<HTMLInputElement>(null);
-  const { sendMessage } = useChat();
+  const { sendMessage } = useChatContext();
   
   // Access extended context properties
-  const chatContext = useChat() as any;
+  const chatContext = useChatContext() as any;
   const { loading, cameraZoomed, setCameraZoomed, message } = chatContext;
 
   const handleSendMessage = async (): Promise<void> => {

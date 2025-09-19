@@ -4,14 +4,13 @@ import {
   Environment,
 } from "@react-three/drei";
 import { useEffect, useRef } from "react";
-import { useChat } from "@/hooks/useChat";
+import { useChatContext } from "@/hooks/useChatContext";
 import { Avatar } from "./Avatar";
 
 
 export const Experience = () => {
   const cameraControls = useRef<CameraControls>(null);
-  const chatContext = useChat() as any;
-  const { cameraZoomed } = chatContext;
+  const  { cameraZoomed } = useChatContext();
 
   useEffect(() => {
     if (cameraControls.current) {
