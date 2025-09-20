@@ -2,7 +2,7 @@ import { useCallback, useEffect, useRef, useState } from 'react';
 import type { MessageResponse, EmotionalIntent, LipSyncData } from '@/types';
 import type { MorphTargetControls } from './useMorphTargets';
 import { corresponding as VISEME_MAP } from '@/constants/visemeMapping';
-import { facialExpressions } from '@/constants';
+import { facialExpressions, expressionUtils } from '@/constants';
 import { useMounted } from '@/hooks/share/useMounted';
 
 // Emotion mapping from emotion names to facial expressions
@@ -95,13 +95,23 @@ export function useAvatarSpeech(
     }
   }, [initAudioContext]);
 
-  // Apply emotional expressions (non-mouth morphs)
-  const applyEmotionalExpression = useCallback((emotion: EmotionalIntent) => {
+  // Apply emotional expressions (with speech adaptation option)
+  const applyEmotionalExpression = useCallback((emotion: EmotionalIntent, isSpeaking: boolean = false) => {
     const expressionMorphs = EMOTION_MAP[emotion.primary.toLowerCase()];
     if (!expressionMorphs) return;
     
+    let finalMorphs = expressionMorphs;
+    
+    // Adapt expression for speech mode to prevent mouth conflicts
+    if (isSpeaking) {
+      finalMorphs = expressionUtils.adaptExpressionForSpeech(
+        expressionMorphs, 
+        emotion.primary.toLowerCase()
+      );
+    }
+    
     // Apply primary emotion with intensity scaling
-    Object.entries(expressionMorphs).forEach(([morphName, baseValue]) => {
+    Object.entries(finalMorphs).forEach(([morphName, baseValue]) => {
       const scaledValue = (baseValue as number) * emotion.intensity;
       morphControls.lerpMorphTarget(morphName, scaledValue, 0.1);
     });
@@ -110,7 +120,17 @@ export function useAvatarSpeech(
     if (emotion.secondaryEmotion) {
       const secondaryMorphs = EMOTION_MAP[emotion.secondaryEmotion.toLowerCase()];
       if (secondaryMorphs) {
-        Object.entries(secondaryMorphs).forEach(([morphName, baseValue]) => {
+        let finalSecondaryMorphs = secondaryMorphs;
+        
+        // Also adapt secondary emotion for speech
+        if (isSpeaking) {
+          finalSecondaryMorphs = expressionUtils.adaptExpressionForSpeech(
+            secondaryMorphs,
+            emotion.secondaryEmotion.toLowerCase()
+          );
+        }
+        
+        Object.entries(finalSecondaryMorphs).forEach(([morphName, baseValue]) => {
           const scaledValue = (baseValue as number) * emotion.intensity * 0.3;
           morphControls.lerpMorphTarget(morphName, scaledValue, 0.1);
         });
@@ -118,11 +138,21 @@ export function useAvatarSpeech(
     }
   }, [morphControls]);
 
-  // Clear emotional expressions
-  const clearEmotionalExpression = useCallback((emotion: EmotionalIntent) => {
+  // Clear emotional expressions (with speech adaptation option)
+  const clearEmotionalExpression = useCallback((emotion: EmotionalIntent, wasSpeaking: boolean = false) => {
     const expressionMorphs = EMOTION_MAP[emotion.primary.toLowerCase()];
     if (expressionMorphs) {
-      Object.keys(expressionMorphs).forEach((morphName) => {
+      let morphsToReset = expressionMorphs;
+      
+      // If we were speaking, we need to reset the adapted morphs
+      if (wasSpeaking) {
+        morphsToReset = expressionUtils.adaptExpressionForSpeech(
+          expressionMorphs,
+          emotion.primary.toLowerCase()
+        );
+      }
+      
+      Object.keys(morphsToReset).forEach((morphName) => {
         morphControls.lerpMorphTarget(morphName, 0, 0.1);
       });
     }
@@ -130,7 +160,16 @@ export function useAvatarSpeech(
     if (emotion.secondaryEmotion) {
       const secondaryMorphs = EMOTION_MAP[emotion.secondaryEmotion.toLowerCase()];
       if (secondaryMorphs) {
-        Object.keys(secondaryMorphs).forEach((morphName) => {
+        let secondaryMorphsToReset = secondaryMorphs;
+        
+        if (wasSpeaking) {
+          secondaryMorphsToReset = expressionUtils.adaptExpressionForSpeech(
+            secondaryMorphs,
+            emotion.secondaryEmotion.toLowerCase()
+          );
+        }
+        
+        Object.keys(secondaryMorphsToReset).forEach((morphName) => {
           morphControls.lerpMorphTarget(morphName, 0, 0.1);
         });
       }
@@ -138,10 +177,12 @@ export function useAvatarSpeech(
   }, [morphControls]);
 
   // Apply lipsync based on current time
+  // NOTE: Lip-sync has FULL CONTROL over mouth morphs during speech
+  // Emotional expressions are adapted to exclude mouth morphs to prevent conflicts
   const updateLipsync = useCallback((currentTime: number, lipsyncData: LipSyncData) => {
     if (!lipsyncData?.mouthCues) return;
     
-    // Reset all viseme morphs first
+    // Reset all viseme morphs first - this ensures clean mouth state
     Object.values(VISEME_MAP).forEach(morphName => {
       morphControls.setMorphTarget(morphName, 0);
     });
@@ -154,6 +195,7 @@ export function useAvatarSpeech(
     if (currentCue) {
       const morphName = VISEME_MAP[currentCue.value];
       if (morphName) {
+        // Apply viseme morph with full intensity for accurate lip-sync
         morphControls.setMorphTarget(morphName, 1);
       }
     }
@@ -305,8 +347,8 @@ export function useAvatarSpeech(
           animationControls.playTalkingAnimation();
         }
         
-        // Apply emotional expression
-        applyEmotionalExpression(message.emotionalIntent);
+        // Apply emotional expression WITH speech adaptation
+        applyEmotionalExpression(message.emotionalIntent, true); // 👈 isSpeaking = true
         
         // Start audio
         source.start();
@@ -324,7 +366,7 @@ export function useAvatarSpeech(
             audioSourceRef.current = null;
             isPlayingRef.current = false;
             setState(prev => ({ ...prev, isPlaying: false }));
-            clearEmotionalExpression(message.emotionalIntent);
+            clearEmotionalExpression(message.emotionalIntent, true); // 👈 wasSpeaking = true
             
             // Stop talking animation
             if (animationControls?.stopAllAnimations) {

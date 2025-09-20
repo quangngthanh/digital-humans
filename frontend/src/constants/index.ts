@@ -1,4 +1,5 @@
 import { FacialExpressions } from "@/types/avatar";
+import { corresponding as VISEME_MAP } from './visemeMapping';
 
 export const avatarModel = "/models/68bafcdfc11cea25ec03e4f1.glb";
 
@@ -1035,115 +1036,210 @@ export const expressionCategories = {
   ]
 };
 
-/**
- * 🎛️ EMOTION INTENSITY LEVELS
- * 
- * Multipliers for creating subtle to extreme variations
- */
-export const emotionIntensities = {
-  /** Very subtle, barely noticeable */
-  micro: 0.2,
-  /** Subtle but visible */
-  subtle: 0.4,
-  /** Normal everyday expression */
-  mild: 0.6,
-  /** Moderate intensity */
-  moderate: 0.8,
-  /** Normal full expression */
-  normal: 1.0,
-  /** Strong, pronounced */
-  strong: 1.2,
-  /** Very intense */
-  intense: 1.4,
-  /** Extreme, exaggerated */
-  extreme: 1.6,
-  /** Over-the-top, cartoonish */
-  theatrical: 2.0,
-};
 
-/**
- * ⏱️ EXPRESSION TIMING GUIDELINES
- * 
- * Recommended durations for natural-looking animations (in milliseconds)
- */
-export const expressionTimings = {
-  /** Quick micro-expressions */
-  microExpressions: {
-    wink: 300,
-    eyeRoll: 600,
-    smirk: 400,
-    blink: 150,
-  },
-  
-  /** Standard expressions */
-  normalExpressions: {
-    smile: 800,
-    frown: 1000,
-    surprised: 500,
-    confused: 1200,
-    thinking: 1500,
-  },
-  
-  /** Extended emotional states */
-  sustainedExpressions: {
-    sad: 2500,
-    angry: 2000,
-    laughing: 3000,
-    crying: 4000,
-    concentrating: 3000,
-  },
-  
-  /** Animation transitions */
-  transitions: {
-    /** Blend between expressions */
-    blend: 500,
-    /** Fade in new expression */
-    fadeIn: 300,
-    /** Fade out expression */
-    fadeOut: 400,
-    /** Hold expression duration */
-    hold: 1000,
-    /** Quick snap to expression */
-    snap: 100,
-  }
-};
 
-/**
- * 🎲 RANDOM EXPRESSION GENERATOR
- * 
- * Arrays for generating idle animations and random expressions
- */
-export const randomExpressions = {
-  /** Subtle idle expressions for background animation */
-  idle: [
-    'default', 'thinking', 'curious', 'contemplating', 'relaxed',
-    'lookLeft', 'lookRight', 'lookUp', 'bored', 'dreamy'
-  ],
-  
-  /** Positive expressions */
-  positive: [
-    'smile', 'joy', 'laughing', 'giggling', 'content', 'proud',
-    'playful', 'welcoming', 'flirtatious', 'cheeky'
-  ],
-  
-  /** Negative expressions */
-  negative: [
-    'sad', 'angry', 'frustrated', 'disgusted', 'annoyed',
-    'worried', 'ashamed', 'uncomfortable', 'pain'
-  ],
-  
-  /** Neutral expressions */
-  neutral: [
-    'default', 'thinking', 'curious', 'focused', 'alert',
-    'contemplating', 'neutral', 'cool'
-  ]
-};
 
 // Final export statement to ensure everything is properly exported
 export default {
   facialExpressions,
   expressionCategories,
-  emotionIntensities,
-  expressionTimings,
-  randomExpressions,
+};
+
+/**
+ * 🎭 MORPH TARGET CATEGORIZATION
+ * 
+ * Separates morphs into mouth-related and non-mouth categories
+ * Essential for preventing conflicts during lip-sync
+ */
+export const MORPH_CATEGORIES = {
+  // Mouth-related morphs (will be excluded during lip-sync)
+  mouth: [
+    // Basic mouth shapes
+    'mouthOpen', 'mouthClose', 'mouthFunnel', 'mouthPucker', 
+    'mouthSmileLeft', 'mouthSmileRight', 'mouthFrownLeft', 'mouthFrownRight',
+    'mouthDimpleLeft', 'mouthDimpleRight', 'mouthStretchLeft', 'mouthStretchRight',
+    'mouthUpperUpLeft', 'mouthUpperUpRight', 'mouthLowerDownLeft', 'mouthLowerDownRight',
+    'mouthPressLeft', 'mouthPressRight', 'mouthShrugUpper', 'mouthShrugLower',
+    'mouthLeft', 'mouthRight', 'mouthRollUpper', 'mouthRollLower',
+    
+    // Jaw movements (affects mouth position)
+    'jawOpen', 'jawForward', 'jawLeft', 'jawRight',
+    
+    // Tongue (part of mouth system)
+    'tongueOut',
+    
+    // Viseme morphs (from VISEME_MAP)
+    ...Object.values(VISEME_MAP),
+  ],
+  
+  // Non-mouth morphs (safe during lip-sync)
+  nonMouth: [
+    // Eyes
+    'eyeBlinkLeft', 'eyeBlinkRight', 'eyeSquintLeft', 'eyeSquintRight',
+    'eyeWideLeft', 'eyeWideRight', 'eyeLookUpLeft', 'eyeLookUpRight',
+    'eyeLookDownLeft', 'eyeLookDownRight', 'eyeLookInLeft', 'eyeLookInRight',
+    'eyeLookOutLeft', 'eyeLookOutRight',
+    
+    // Eyebrows
+    'browDownLeft', 'browDownRight', 'browInnerUp', 'browOuterUpLeft', 'browOuterUpRight',
+    
+    // Nose
+    'noseSneerLeft', 'noseSneerRight',
+    
+    // Cheeks
+    'cheekPuff', 'cheekSquintLeft', 'cheekSquintRight',
+  ]
+};
+
+/**
+ * 🎯 SPEECH-ADAPTED EXPRESSIONS
+ * 
+ * Configuration for adapting emotional expressions during speech
+ */
+export const speechAdaptedExpressions = {
+  // Compensation multipliers for non-mouth morphs during speech
+  compensationFactors: {
+    eyes: 1.2,        // Enhance eye expressions
+    eyebrows: 1.15,   // Slightly enhance eyebrows
+    cheeks: 1.1,      // Subtle cheek enhancement
+    nose: 1.05,       // Minimal nose enhancement
+  },
+  
+  // Alternative expressions for emotions heavily dependent on mouth
+  alternatives: {
+    // For smile-based emotions, emphasize eyes/cheeks
+    smile: {
+      eyeSquintLeft: 0.4,
+      eyeSquintRight: 0.4,
+      cheekSquintLeft: 0.6,
+      cheekSquintRight: 0.6,
+      browOuterUpLeft: 0.2,
+      browOuterUpRight: 0.2,
+    },
+    
+    // For sad emotions, emphasize brows/eyes
+    sad: {
+      browInnerUp: 1.0,
+      eyeSquintLeft: 0.8,
+      eyeSquintRight: 0.8,
+      eyeLookDownLeft: 0.8,
+      eyeLookDownRight: 0.8,
+    },
+    
+    // For joy/happiness, focus on eyes and cheeks
+    joy: {
+      eyeSquintLeft: 0.9,
+      eyeSquintRight: 0.9,
+      cheekSquintLeft: 0.8,
+      cheekSquintRight: 0.8,
+      browOuterUpLeft: 0.4,
+      browOuterUpRight: 0.4,
+    },
+    
+    // For anger, emphasize brows and nose
+    angry: {
+      browDownLeft: 1.0,
+      browDownRight: 1.0,
+      eyeSquintLeft: 0.8,
+      eyeSquintRight: 0.8,
+      noseSneerLeft: 0.7,
+      noseSneerRight: 0.7,
+      cheekSquintLeft: 0.5,
+      cheekSquintRight: 0.5,
+    },
+    
+    // For surprise, focus on eyes and brows
+    surprised: {
+      eyeWideLeft: 1.0,
+      eyeWideRight: 1.0,
+      browInnerUp: 1.0,
+      browOuterUpLeft: 0.8,
+      browOuterUpRight: 0.8,
+    }
+  }
+};
+
+/**
+ * 🛠️ EXPRESSION UTILITIES
+ * 
+ * Helper functions for morph processing and expression adaptation
+ */
+export const expressionUtils = {
+  /**
+   * Filter morphs by category
+   */
+  filterMorphsByCategory: (morphs: Record<string, number>, category: 'mouth' | 'nonMouth') => {
+    const allowedMorphs = MORPH_CATEGORIES[category];
+    return Object.fromEntries(
+      Object.entries(morphs).filter(([morphName]) => 
+        allowedMorphs.includes(morphName)
+      )
+    );
+  },
+  
+  /**
+   * Remove mouth morphs from expression
+   */
+  removeMouthMorphs: (morphs: Record<string, number>) => {
+    return Object.fromEntries(
+      Object.entries(morphs).filter(([morphName]) => 
+        !MORPH_CATEGORIES.mouth.includes(morphName)
+      )
+    );
+  },
+  
+  /**
+   * Enhance non-mouth morphs with compensation factors
+   */
+  enhanceNonMouthMorphs: (morphs: Record<string, number>) => {
+    const enhanced = { ...morphs };
+    
+    Object.entries(enhanced).forEach(([morphName, value]) => {
+      if (morphName.includes('eye') || morphName.includes('Eye')) {
+        enhanced[morphName] = value * speechAdaptedExpressions.compensationFactors.eyes;
+      } else if (morphName.includes('brow') || morphName.includes('Brow')) {
+        enhanced[morphName] = value * speechAdaptedExpressions.compensationFactors.eyebrows;
+      } else if (morphName.includes('cheek') || morphName.includes('Cheek')) {
+        enhanced[morphName] = value * speechAdaptedExpressions.compensationFactors.cheeks;
+      } else if (morphName.includes('nose') || morphName.includes('Nose')) {
+        enhanced[morphName] = value * speechAdaptedExpressions.compensationFactors.nose;
+      }
+    });
+    
+    return enhanced;
+  },
+  
+  /**
+   * Get speech-adapted version of an expression
+   */
+  adaptExpressionForSpeech: (morphs: Record<string, number>, emotionName?: string) => {
+    // First remove mouth morphs
+    let adaptedMorphs = expressionUtils.removeMouthMorphs(morphs);
+    
+    // If we have a specific emotion alternative, use it
+    if (emotionName && emotionName in speechAdaptedExpressions.alternatives) {
+      const alternative = speechAdaptedExpressions.alternatives[emotionName as keyof typeof speechAdaptedExpressions.alternatives];
+      // Merge alternative morphs, prioritizing alternative values
+      adaptedMorphs = { ...adaptedMorphs, ...alternative };
+    }
+    
+    // Enhance remaining morphs for better visibility during speech
+    adaptedMorphs = expressionUtils.enhanceNonMouthMorphs(adaptedMorphs);
+    
+    return adaptedMorphs;
+  },
+  
+  /**
+   * Check if a morph name is mouth-related
+   */
+  isMouthMorph: (morphName: string) => {
+    return MORPH_CATEGORIES.mouth.includes(morphName);
+  },
+  
+  /**
+   * Check if a morph name is non-mouth related
+   */
+  isNonMouthMorph: (morphName: string) => {
+    return MORPH_CATEGORIES.nonMouth.includes(morphName);
+  }
 };
