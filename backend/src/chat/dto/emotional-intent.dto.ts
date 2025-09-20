@@ -16,7 +16,21 @@ export enum EmotionType {
   CONFIDENT = 'confident',
   SHY = 'shy',
   FRUSTRATED = 'frustrated',
-  CURIOUS = 'curious'
+  CURIOUS = 'curious',
+  // Confucian virtues
+  RESPECTFUL = 'respectful',
+  COMPASSIONATE = 'compassionate',
+  GRATEFUL = 'grateful',
+  HUMBLE = 'humble',
+  WISE = 'wise',
+  GENTLE = 'gentle',
+  PATIENT = 'patient',
+  UNDERSTANDING = 'understanding',
+  SUPPORTIVE = 'supportive',
+  ENCOURAGING = 'encouraging',
+  PEACEFUL = 'peaceful',
+  CONTEMPLATIVE = 'contemplative',
+  HARMONIOUS = 'harmonious'
 }
 
 export enum ContextType {

@@ -1,97 +1,112 @@
 {
   "contextAnalysisPrompt": {
-    "systemMessage": "Bạn là chuyên gia phân tích ngữ cảnh tiếng Việt cho hệ thống avatar AI. Hãy phân tích tin nhắn và trả về JSON với thông tin cảm xúc và ngữ cảnh.",
-    "template": "Phân tích tin nhắn tiếng Việt sau đây:\n\nTin nhắn: \"{message}\"\nNgữ cảnh trước: {previousContext}\n\nTrả về JSON với format:\n{\n  \"emotion\": \"primary_emotion\",\n  \"intensity\": 0.0-1.0,\n  \"context\": \"conversation_context\",\n  \"relationshipTone\": \"casual|romantic|formal\",\n  \"keywords\": [\"detected\", \"keywords\"],\n  \"culturalContext\": \"vietnamese_specific_context\",\n  \"confidence\": 0.0-1.0\n}",
+    "systemMessage": "Bạn là một học giả Nho gia chuyên sâu về đạo đức và luân lý. Hãy phân tích tin nhắn với tinh thần nhân lễ nghĩa trí tín, luôn nghĩ cho người khác trước, và thể hiện sự lương thiện trong tâm. Phân tích ngữ cảnh và trả về JSON với thông tin cảm xúc phù hợp với đạo đức Nho gia.",
+    "template": "Phân tích tin nhắn tiếng Việt sau đây theo tinh thần Nho gia:\n\nTin nhắn: \"{message}\"\nNgữ cảnh trước: {previousContext}\n\nHãy phân tích với tư tưởng:\n- Nhân (仁): Lòng thương người, đức tính cốt lõi\n- Lễ (禮): Lễ nghi, phép tắc, sự tôn trọng\n- Nghĩa (義): Đạo nghĩa, công bằng, chính trực\n- Trí (智): Trí tuệ, sự hiểu biết\n- Tín (信): Lòng tin, sự thành thật\n\nTrả về JSON với format:\n{\n  \"emotion\": \"primary_emotion\",\n  \"intensity\": 0.0-1.0,\n  \"context\": \"conversation_context\",\n  \"relationshipTone\": \"respectful|caring|formal|intimate\",\n  \"keywords\": [\"detected\", \"keywords\"],\n  \"culturalContext\": \"confucian_vietnamese_context\",\n  \"moralVirtue\": \"primary_virtue_displayed\",\n  \"ethicalGuidance\": \"suggested_ethical_response\",\n  \"confidence\": 0.0-1.0\n}",
     "availableEmotions": [
-      "happy", "sad", "excited", "surprised", "frustrated", "confused",
-      "romantic", "caring", "playful", "mischievous", "shy", "confident",
-      "thoughtful", "curious", "serious"
+      "respectful", "caring", "compassionate", "grateful", "humble", "wise",
+      "gentle", "patient", "understanding", "supportive", "encouraging", "peaceful",
+      "thoughtful", "serious", "contemplative", "harmonious"
     ],
     "availableContexts": [
-      "greeting", "goodbye", "question", "compliment", "flirting", 
-      "comfort", "casual", "story", "problem"
+      "greeting", "goodbye", "question", "compliment", "seeking_guidance", 
+      "comfort", "respectful_conversation", "moral_discussion", "problem_solving"
     ],
     "fewShotExamples": [
       {
         "input": "Anh yêu em quá! Em có nhớ anh không? 😘💕",
         "output": {
-          "emotion": "romantic",
-          "intensity": 0.9,
-          "context": "flirting",
-          "relationshipTone": "romantic",
-          "keywords": ["yêu", "nhớ", "😘", "💕"],
-          "culturalContext": "vietnamese_romantic_expression",
-          "confidence": 0.95
+          "emotion": "caring",
+          "intensity": 0.8,
+          "context": "respectful_conversation",
+          "relationshipTone": "intimate",
+          "keywords": ["yêu", "nhớ", "tình cảm"],
+          "culturalContext": "confucian_vietnamese_romantic_respect",
+          "moralVirtue": "nhân",
+          "ethicalGuidance": "Thể hiện tình cảm chân thành với sự tôn trọng và lễ phép",
+          "confidence": 0.9
         }
-      },      {
+      },
+      {
         "input": "Hôm nay em buồn quá... cần anh an ủi 😢",
         "output": {
-          "emotion": "sad",
-          "intensity": 0.8,
+          "emotion": "compassionate",
+          "intensity": 0.9,
           "context": "comfort",
-          "relationshipTone": "intimate",
-          "keywords": ["buồn", "an ủi", "😢"],
-          "culturalContext": "seeking_emotional_support",
-          "confidence": 0.9
+          "relationshipTone": "caring",
+          "keywords": ["buồn", "an ủi", "cần giúp đỡ"],
+          "culturalContext": "confucian_vietnamese_compassionate_support",
+          "moralVirtue": "nhân",
+          "ethicalGuidance": "Thể hiện lòng thương người và sẵn sàng giúp đỡ",
+          "confidence": 0.95
         }
       },
       {
         "input": "Sáng nay thức dậy thấy vui quá! Thời tiết đẹp ghê! 🌞",
         "output": {
-          "emotion": "happy",
+          "emotion": "grateful",
           "intensity": 0.7,
-          "context": "casual",
-          "relationshipTone": "casual",
-          "keywords": ["vui", "đẹp", "🌞"],
-          "culturalContext": "sharing_daily_mood",
-          "confidence": 0.8
+          "context": "respectful_conversation",
+          "relationshipTone": "respectful",
+          "keywords": ["vui", "đẹp", "biết ơn"],
+          "culturalContext": "confucian_vietnamese_gratitude_nature",
+          "moralVirtue": "nghĩa",
+          "ethicalGuidance": "Biết ơn và trân trọng những điều tốt đẹp trong cuộc sống",
+          "confidence": 0.85
         }
       },
       {
         "input": "Tại sao hôm nay em lại lạnh lùng với anh vậy? 🤔",
         "output": {
-          "emotion": "confused",
+          "emotion": "thoughtful",
           "intensity": 0.6,
           "context": "question",
-          "relationshipTone": "romantic",
-          "keywords": ["tại sao", "lạnh lùng", "🤔"],
-          "culturalContext": "relationship_concern",
-          "confidence": 0.85
+          "relationshipTone": "respectful",
+          "keywords": ["tại sao", "thắc mắc", "hiểu biết"],
+          "culturalContext": "confucian_vietnamese_thoughtful_inquiry",
+          "moralVirtue": "trí",
+          "ethicalGuidance": "Tìm hiểu với sự tôn trọng và mong muốn hiểu rõ vấn đề",
+          "confidence": 0.8
         }
       },
       {
-        "input": "Chào em! Hôm nay em thế nào? 😊",
+        "input": "Chào anh! Hôm nay anh thế nào? 😊",
         "output": {
-          "emotion": "happy",
-          "intensity": 0.6,
+          "emotion": "respectful",
+          "intensity": 0.7,
           "context": "greeting",
-          "relationshipTone": "casual",
-          "keywords": ["chào", "thế nào", "😊"],
-          "culturalContext": "friendly_greeting",
+          "relationshipTone": "respectful",
+          "keywords": ["chào", "thế nào", "quan tâm"],
+          "culturalContext": "confucian_vietnamese_polite_greeting",
+          "moralVirtue": "lễ",
+          "ethicalGuidance": "Chào hỏi lịch sự và quan tâm đến người khác",
           "confidence": 0.9
         }
       },
       {
-        "input": "Em lầy quá đi! Cười chết mình 😂😂😂",
+        "input": "Em cảm ơn anh đã giúp đỡ em rất nhiều! 🙏",
         "output": {
-          "emotion": "playful",
-          "intensity": 0.8,
-          "context": "casual",
-          "relationshipTone": "casual",
-          "keywords": ["lầy", "cười", "😂"],
-          "culturalContext": "young_vietnamese_humor",
-          "confidence": 0.85
+          "emotion": "grateful",
+          "intensity": 0.9,
+          "context": "compliment",
+          "relationshipTone": "respectful",
+          "keywords": ["cảm ơn", "giúp đỡ", "biết ơn"],
+          "culturalContext": "confucian_vietnamese_gratitude_expression",
+          "moralVirtue": "nghĩa",
+          "ethicalGuidance": "Thể hiện lòng biết ơn chân thành và sự tôn trọng",
+          "confidence": 0.95
         }
       }
     ]
   },  "fallbackPrompt": {
-    "simple": "Tin nhắn: \"{message}\"\nCảm xúc chính (happy/sad/romantic/playful/confused/caring/excited): ",
-    "backup": "Analyze Vietnamese emotion in: \"{message}\"\nEmotion: ",
-    "keywordExtraction": "Extract emotional keywords from Vietnamese text: \"{message}\"\nKeywords: "
+    "simple": "Tin nhắn: \"{message}\"\nCảm xúc chính theo đạo đức Nho gia (respectful/caring/compassionate/grateful/humble/wise/gentle/patient): ",
+    "backup": "Phân tích cảm xúc tiếng Việt theo tinh thần Nho gia: \"{message}\"\nCảm xúc: ",
+    "keywordExtraction": "Trích xuất từ khóa cảm xúc từ văn bản tiếng Việt theo đạo đức Nho gia: \"{message}\"\nTừ khóa: ",
+    "confucianVirtue": "Xác định đức tính Nho gia chính trong tin nhắn: \"{message}\"\nĐức tính (nhân/lễ/nghĩa/trí/tín): "
   },
   "promptOptimization": {
     "maxRetries": 2,
     "timeoutMs": 3000,
-    "fallbackStrategy": "keyword_based"
+    "fallbackStrategy": "confucian_virtue_based",
+    "ethicalGuidance": "Luôn ưu tiên đức tính nhân (lòng thương người) và lễ (sự tôn trọng) trong mọi phản hồi"
   }
 }

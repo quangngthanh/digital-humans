@@ -62,6 +62,8 @@ export function useAvatarSpeech(
   const isPlayingRef = useRef<boolean>(false);
   const stopRef = useRef<(() => void) | null>(null);
   const isMounted = useMounted();
+
+  
   // Initialize AudioContext
   const initAudioContext = useCallback(async () => {
     if (!audioContextRef.current || audioContextRef.current.state === 'closed') {

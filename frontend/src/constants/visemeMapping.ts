@@ -39,20 +39,3 @@ export const corresponding: VisemeMapping = {
     X: "viseme_sil",
   };
   
-  /**
-   * 🔄 ALTERNATIVE VISEME MAPPING
-   * 
-   * Alternative mapping for different animation styles or voice characteristics
-   */
-  export const corresponding2: VisemeMapping = {
-    A: "viseme_PP",  // Keep bilabial
-    B: "viseme_SS",  // Use sibilant for teeth clenching
-    C: "viseme_E",   // Use mid vowel instead
-    D: "viseme_aa",  // Keep wide open
-    E: "viseme_O",   // Keep rounded
-    F: "viseme_U",   // Keep puckered
-    G: "viseme_FF",  // Keep labiodental
-    H: "viseme_nn",  // Use nasal instead of dental
-    X: "viseme_sil", // Keep silence
-  };
-  

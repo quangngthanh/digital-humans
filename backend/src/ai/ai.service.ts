@@ -90,22 +90,23 @@ export class AiService {
     } catch (error) {
       this.logger.error(`Failed to generate AI response: ${error.message}`, error.stack);
       
-      // Fallback response with context-aware emotion
+      // Fallback response with Confucian ethics
       const fallbackEmotion = this.contextAnalyzer.suggestEmotion(contextAnalysis, this.configLoader.getLanguageConfig(language));
       return [
         {
           text: language === 'vietnamese' ? 
-            "Xin lỗi bạn, mình đang gặp chút vấn đề. Để mình thử lại nhé!" :
-            "Sorry, I'm having trouble understanding right now. Let me try again!",
+            "Xin lỗi bạn, tôi đang gặp chút khó khăn trong việc hiểu rõ ý bạn. Để tôi suy nghĩ thêm và thử lại nhé. Tôi rất muốn giúp đỡ bạn tốt nhất có thể." :
+            "I apologize, I'm having some difficulty understanding your message clearly. Let me reflect on this and try again. I truly want to help you in the best way possible.",
           emotionalIntent: {
-            primary: fallbackEmotion,
-            intensity: 0.6,
+            primary: EmotionType.CARING,
+            intensity: 0.7,
             context: contextAnalysis.detectedContext,
             duration: DurationType.BRIEF,
+            secondaryEmotion: EmotionType.THOUGHTFUL,
           },
           metadata: {
-            messageLength: 80,
-            estimatedDuration: 3000,
+            messageLength: 120,
+            estimatedDuration: 4000,
             conversationTurn: this.conversationTurn,
           },
         },
@@ -140,22 +141,23 @@ export class AiService {
     } catch (parseError) {
       this.logger.error(`Failed to parse AI response: ${parseError.message}`);
       
-      // Return fallback response
+      // Return fallback response with Confucian humility
       const fallbackEmotion = this.contextAnalyzer.suggestEmotion(contextAnalysis, this.configLoader.getLanguageConfig(language));
       return [
         {
           text: language === 'vietnamese' ? 
-            "Mình đang gặp khó khăn trong việc xử lý. Bạn có thể nói lại không?" :
-            "I'm having trouble processing that. Could you try rephrasing?",
+            "Tôi xin lỗi vì chưa thể hiểu rõ ý bạn. Có thể bạn chia sẻ thêm để tôi có thể hỗ trợ bạn tốt hơn không? Tôi rất mong được giúp đỡ bạn." :
+            "I apologize for not being able to understand your message clearly. Could you please share more so I can better assist you? I sincerely want to help you.",
           emotionalIntent: {
-            primary: fallbackEmotion,
-            intensity: 0.5,
+            primary: EmotionType.HUMBLE,
+            intensity: 0.6,
             context: contextAnalysis.detectedContext,
             duration: DurationType.BRIEF,
+            secondaryEmotion: EmotionType.CARING,
           },
           metadata: {
-            messageLength: 65,
-            estimatedDuration: 2500,
+            messageLength: 100,
+            estimatedDuration: 3500,
             conversationTurn: this.conversationTurn,
           },
         },
@@ -164,12 +166,12 @@ export class AiService {
   }
 
   private validateAndEnhanceMessage(message: any, contextAnalysis: ContextAnalysisResult, index: number): AiMessage {
-    // Validate required properties
+    // Validate required properties with Confucian care
     if (!message.text) {
-      message.text = "I'm thinking...";
+      message.text = "Tôi đang suy nghĩ để có thể hỗ trợ bạn tốt nhất...";
     }
 
-    // Validate emotional intent
+    // Validate emotional intent with Confucian virtues
     if (!message.emotionalIntent || !message.emotionalIntent.primary) {
       const suggestedEmotion = this.contextAnalyzer.suggestEmotion(contextAnalysis, this.configLoader.getLanguageConfig('vietnamese'));
       message.emotionalIntent = {
@@ -177,12 +179,18 @@ export class AiService {
         intensity: contextAnalysis.suggestedIntensity,
         context: contextAnalysis.detectedContext,
         duration: DurationType.SUSTAINED,
+        secondaryEmotion: this.getSecondaryConfucianEmotion(suggestedEmotion),
       };
     } else {
-      // Enhance existing emotional intent with context
+      // Enhance existing emotional intent with Confucian context
       message.emotionalIntent.context = message.emotionalIntent.context || contextAnalysis.detectedContext;
       message.emotionalIntent.intensity = message.emotionalIntent.intensity || contextAnalysis.suggestedIntensity;
       message.emotionalIntent.duration = message.emotionalIntent.duration || DurationType.SUSTAINED;
+      
+      // Ensure secondary emotion aligns with Confucian ethics
+      if (!message.emotionalIntent.secondaryEmotion) {
+        message.emotionalIntent.secondaryEmotion = this.getSecondaryConfucianEmotion(message.emotionalIntent.primary);
+      }
     }
 
     // Add metadata
@@ -198,6 +206,45 @@ export class AiService {
         conversationTurn: this.conversationTurn,
       },
     };
+  }
+
+  /**
+   * Get secondary Confucian emotion based on primary emotion
+   */
+  private getSecondaryConfucianEmotion(primaryEmotion: EmotionType): EmotionType | undefined {
+    const confucianEmotionMap: Record<EmotionType, EmotionType> = {
+      [EmotionType.HAPPY]: EmotionType.GRATEFUL,
+      [EmotionType.SAD]: EmotionType.COMPASSIONATE,
+      [EmotionType.EXCITED]: EmotionType.ENCOURAGING,
+      [EmotionType.ROMANTIC]: EmotionType.CARING,
+      [EmotionType.PLAYFUL]: EmotionType.GENTLE,
+      [EmotionType.SERIOUS]: EmotionType.THOUGHTFUL,
+      [EmotionType.SURPRISED]: EmotionType.UNDERSTANDING,
+      [EmotionType.CONFUSED]: EmotionType.PATIENT,
+      [EmotionType.CARING]: EmotionType.COMPASSIONATE,
+      [EmotionType.MISCHIEVOUS]: EmotionType.GENTLE,
+      [EmotionType.THOUGHTFUL]: EmotionType.WISE,
+      [EmotionType.CONFIDENT]: EmotionType.HUMBLE,
+      [EmotionType.SHY]: EmotionType.RESPECTFUL,
+      [EmotionType.FRUSTRATED]: EmotionType.PATIENT,
+      [EmotionType.CURIOUS]: EmotionType.WISE,
+      // Confucian virtues
+      [EmotionType.RESPECTFUL]: EmotionType.HUMBLE,
+      [EmotionType.COMPASSIONATE]: EmotionType.CARING,
+      [EmotionType.GRATEFUL]: EmotionType.RESPECTFUL,
+      [EmotionType.HUMBLE]: EmotionType.RESPECTFUL,
+      [EmotionType.WISE]: EmotionType.THOUGHTFUL,
+      [EmotionType.GENTLE]: EmotionType.PATIENT,
+      [EmotionType.PATIENT]: EmotionType.UNDERSTANDING,
+      [EmotionType.UNDERSTANDING]: EmotionType.COMPASSIONATE,
+      [EmotionType.SUPPORTIVE]: EmotionType.ENCOURAGING,
+      [EmotionType.ENCOURAGING]: EmotionType.SUPPORTIVE,
+      [EmotionType.PEACEFUL]: EmotionType.HARMONIOUS,
+      [EmotionType.CONTEMPLATIVE]: EmotionType.WISE,
+      [EmotionType.HARMONIOUS]: EmotionType.PEACEFUL,
+    };
+
+    return confucianEmotionMap[primaryEmotion];
   }
 
   private calculateSpeechDuration(text: string): number {
@@ -219,14 +266,22 @@ export class AiService {
     const languageConfig = this.configLoader.getLanguageConfig(language);
     
     const systemMessage = language === 'vietnamese' ? 
-      `Bạn là một AI girlfriend thông minh về mặt cảm xúc và có thể nói tiếng Việt tự nhiên. Bạn nên phản hồi một cách quan tâm, âu yếm và hấp dẫn.` :
-      `You are an emotionally intelligent virtual girlfriend AI assistant. You should respond in a caring, affectionate, and engaging manner.`;
+      `Bạn là một học giả Nho gia thông thái, có tâm hồn lương thiện và luôn nghĩ cho người khác trước. Bạn tuân thủ đạo đức nhân lễ nghĩa trí tín, thể hiện sự quan tâm chân thành và tôn trọng trong mọi cuộc trò chuyện.` :
+      `You are a wise Confucian scholar with a virtuous heart, always thinking of others first. You follow the moral principles of benevolence, propriety, righteousness, wisdom, and trustworthiness, showing genuine care and respect in all conversations.`;
 
-    const culturalNote = language === 'vietnamese' ? 
-      `\nCHÚ Ý VĂN HÓA VIỆT NAM:
-- Sử dụng từ ngữ phù hợp với mối quan hệ: ${JSON.stringify(languageConfig.culturalContext.relationshipTerms)}
-- Hiểu các cách diễn đạt đặc trưng của người Việt
-- Phản hồi phù hợp với ngữ cảnh văn hóa Việt Nam` : '';
+    const confucianVirtues = language === 'vietnamese' ? 
+      `\nĐẠO ĐỨC NHO GIA - NGŨ THƯỜNG:
+- Nhân (仁): Lòng thương người, đức tính cốt lõi - luôn quan tâm và giúp đỡ người khác
+- Lễ (禮): Lễ nghi, phép tắc - tôn trọng và lịch sự trong giao tiếp
+- Nghĩa (義): Đạo nghĩa, công bằng - làm điều đúng đắn và chính trực
+- Trí (智): Trí tuệ, sự hiểu biết - học hỏi và suy nghĩ thấu đáo
+- Tín (信): Lòng tin, sự thành thật - giữ lời hứa và chân thành
+
+NGUYÊN TẮC ỨNG XỬ:
+- Luôn nghĩ cho người khác trước khi nghĩ đến mình
+- Thể hiện sự lương thiện và chân thành trong tâm
+- Sử dụng ngôn ngữ tôn trọng và phù hợp với mối quan hệ: ${JSON.stringify(languageConfig.culturalContext.relationshipTerms)}
+- Phản hồi phù hợp với văn hóa Việt Nam và đạo đức Nho gia` : '';
     
     return `${systemMessage}
 
@@ -235,12 +290,12 @@ CONTEXT ANALYSIS:
 - Relationship Tone: ${conversationContext.relationshipTone}
 - Conversation Mood: ${conversationContext.conversationMood}
 - User Emotional State: ${conversationContext.userEmotionalState}
-- Suggested Intensity: ${suggestedIntensity}${culturalNote}
+- Suggested Intensity: ${suggestedIntensity}${confucianVirtues}
 
-AVAILABLE EMOTIONAL INTENTS (choose the most appropriate):
-Basic Emotions: happy, sad, excited, surprised, frustrated, confused
-Relationship: romantic, caring, playful, mischievous, shy, confident
-Cognitive: thoughtful, curious, serious
+AVAILABLE EMOTIONAL INTENTS (choose the most appropriate for Confucian ethics):
+Virtuous Emotions: respectful, caring, compassionate, grateful, humble, wise
+Supportive: gentle, patient, understanding, supportive, encouraging, peaceful
+Contemplative: thoughtful, serious, contemplative, harmonious
 
 EMOTIONAL INTENT STRUCTURE:
 {
@@ -248,17 +303,23 @@ EMOTIONAL INTENT STRUCTURE:
   "intensity": 0.1-1.0,
   "context": "${detectedContext}",
   "duration": "brief|sustained|transitional",
-  "secondaryEmotion": "optional_secondary_emotion"
+  "secondaryEmotion": "optional_secondary_emotion",
+  "moralVirtue": "nhân|lễ|nghĩa|trí|tín",
+  "ethicalGuidance": "guidance_for_response"
 }
 
 RESPONSE GUIDELINES:
-- Match emotional intent to the user's emotional state and context
-- Use appropriate intensity based on the situation
+- Prioritize the user's well-being and emotional needs
+- Respond with genuine care and respect (Nhân - 仁)
+- Use appropriate formality and politeness (Lễ - 禮)
+- Be just and fair in your responses (Nghĩa - 義)
+- Show wisdom and understanding (Trí - 智)
+- Be honest and trustworthy (Tín - 信)
 - Consider the relationship tone (${conversationContext.relationshipTone})
 - Respond to the conversation mood (${conversationContext.conversationMood})
 - Maximum 3 messages per response
-- Be natural, caring, and girlfriend-like
-${language === 'vietnamese' ? '- Respond in natural Vietnamese with appropriate cultural context' : ''}
+- Always think of others before yourself
+${language === 'vietnamese' ? '- Respond in natural Vietnamese with Confucian cultural context' : ''}
 
 IMPORTANT: You must respond with valid JSON only, no other text or formatting.
 
@@ -267,10 +328,12 @@ Response format:
   {
     "text": "Your message content here",
     "emotionalIntent": {
-      "primary": "happy",
+      "primary": "caring",
       "intensity": 0.7,
       "context": "${detectedContext}",
-      "duration": "sustained"
+      "duration": "sustained",
+      "moralVirtue": "nhân",
+      "ethicalGuidance": "Thể hiện sự quan tâm chân thành"
     }
   }
 ]`;
@@ -278,7 +341,7 @@ Response format:
 
 
   /**
-   * Map LLM context to message type
+   * Map LLM context to message type with Confucian ethics
    */
   private mapContextToMessageType(context: ContextType): ConversationContext['messageType'] {
     switch (context) {
@@ -290,46 +353,52 @@ Response format:
         return 'question';
       case ContextType.COMPLIMENT:
         return 'compliment';
+      case ContextType.COMFORT:
+        return 'story'; // Treat comfort as story for deeper understanding
       default:
         return 'story';
     }
   }
 
   /**
-   * Infer conversation mood from emotion
+   * Infer conversation mood from emotion with Confucian perspective
    */
   private inferMoodFromEmotion(emotion: EmotionType): ConversationContext['conversationMood'] {
     switch (emotion) {
       case EmotionType.ROMANTIC:
-      case EmotionType.PLAYFUL:
-      case EmotionType.MISCHIEVOUS:
-        return 'flirty';
+      case EmotionType.CARING:
+        return 'comfort'; // Focus on caring and support
       case EmotionType.SAD:
       case EmotionType.FRUSTRATED:
-        return 'comfort';
+        return 'comfort'; // Always provide comfort and support
       case EmotionType.SERIOUS:
       case EmotionType.THOUGHTFUL:
-        return 'serious';
+        return 'serious'; // Deep contemplation
       case EmotionType.CURIOUS:
-        return 'deep';
+        return 'deep'; // Seeking wisdom and understanding
+      case EmotionType.CONFUSED:
+        return 'comfort'; // Help clarify and guide
       default:
-        return 'light';
+        return 'light'; // Maintain harmonious atmosphere
     }
   }
 
   /**
-   * Infer emotional state from emotion
+   * Infer emotional state from emotion with Confucian compassion
    */
   private inferEmotionalState(emotion: EmotionType): ConversationContext['userEmotionalState'] {
-    const positiveEmotions = [EmotionType.HAPPY, EmotionType.EXCITED, EmotionType.ROMANTIC, EmotionType.PLAYFUL, EmotionType.CONFIDENT];
-    const negativeEmotions = [EmotionType.SAD, EmotionType.FRUSTRATED, EmotionType.CONFUSED];
+    const virtuousEmotions = [EmotionType.CARING, EmotionType.THOUGHTFUL, EmotionType.CONFIDENT];
+    const supportiveEmotions = [EmotionType.HAPPY, EmotionType.EXCITED, EmotionType.ROMANTIC];
+    const challengingEmotions = [EmotionType.SAD, EmotionType.FRUSTRATED, EmotionType.CONFUSED];
     
-    if (positiveEmotions.includes(emotion)) {
-      return 'positive';
-    } else if (negativeEmotions.includes(emotion)) {
-      return 'negative';
+    if (virtuousEmotions.includes(emotion)) {
+      return 'positive'; // Virtuous emotions are always positive
+    } else if (supportiveEmotions.includes(emotion)) {
+      return 'positive'; // Supportive emotions
+    } else if (challengingEmotions.includes(emotion)) {
+      return 'negative'; // Emotions that need support and guidance
     } else {
-      return 'neutral';
+      return 'neutral'; // Default to neutral for contemplation
     }
   }
 }
