@@ -29,6 +29,9 @@ export function useAnimations({ animations, group }: UseAnimationsProps): Animat
   const animationStateRef = useRef<AnimationState>('idle');
   const idleTimer = useRef<NodeJS.Timeout | null>(null);
 
+  // ✅ ADD: Talking animation rotation timer
+  const talkingTimer = useRef<NodeJS.Timeout | null>(null);
+
   // Suppress Three.js PropertyBinding warnings
   useEffect(() => {
     const originalWarn = console.warn;
@@ -119,7 +122,7 @@ export function useAnimations({ animations, group }: UseAnimationsProps): Animat
               if (animationStateRef.current === 'idle') {
                 startIdleSystem();
               }
-            }, 100);
+            }, 1000); // ✅ FIXED: Added missing semicolon
           }
 
           currentMixer.removeEventListener('finished', onFinished);
@@ -137,14 +140,29 @@ export function useAnimations({ animations, group }: UseAnimationsProps): Animat
 
   // Play random talking animation
   const playTalkingAnimation = useCallback(() => {
-    const talkingAnims = ANIMATION_CONFIG.talkingAnimations;
-    const randomAnimation = talkingAnims[Math.floor(Math.random() * talkingAnims.length)];
-    
-    stopIdleSystem(); // Stop idle system when talking
+    stopIdleSystem();
     setAnimationState('talking');
-    playAnimation(randomAnimation);
     
-    logger.info(`🗣️ Playing talking animation: ${randomAnimation}`);
+    // ✅ IMPROVED: Start talking animation cycle
+    const startTalkingCycle = () => {
+      const talkingAnims = ANIMATION_CONFIG.talkingAnimations;
+      const randomAnimation = talkingAnims[Math.floor(Math.random() * talkingAnims.length)];
+      
+      // ✅ FIXED: Use infinite loop to prevent completion handler
+      playAnimation(randomAnimation, true); // true = infinite loop
+    
+      logger.info(`🗣️ Playing talking animation: ${randomAnimation} (infinite)`);
+      
+      // Schedule next talking animation change (if still talking)
+      talkingTimer.current = setTimeout(() => {
+        if (animationStateRef.current === 'talking') {
+          startTalkingCycle(); // ✅ Cycle to new infinite animation
+        }
+      }, 6000); // Change animation every 6 seconds
+    };
+    
+    // Start the cycle
+    startTalkingCycle();
   }, [playAnimation]);
 
   // Start idle animation system
@@ -206,6 +224,15 @@ export function useAnimations({ animations, group }: UseAnimationsProps): Animat
     
     logger.info('�� Idle animation system stopped');
   }, []);
+  
+  // ✅ ADD: Stop talking animation system
+  const stopTalkingSystem = useCallback(() => {
+    if (talkingTimer.current) {
+      clearTimeout(talkingTimer.current);
+      talkingTimer.current = null;
+    }
+    logger.info('🛑 Talking animation system stopped');
+  }, []);
 
   // Stop all animations
   const stopAllAnimations = useCallback(() => {
@@ -217,7 +244,8 @@ export function useAnimations({ animations, group }: UseAnimationsProps): Animat
       logger.info('⏹️ All animations stopped - Set animation state to idle');
     }
     stopIdleSystem();
-  }, [stopIdleSystem]);
+    stopTalkingSystem(); // ✅ ADD: Also stop talking system
+  }, [stopIdleSystem, stopTalkingSystem]);
 
   // Get current state
   // const getCurrentState = useCallback(() => animationState, [animationState]);

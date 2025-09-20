@@ -21,7 +21,11 @@ export function useAvatarSpeech(
   messages: MessageResponse[],
   morphControls: MorphTargetControls,
   onMessagePlayed?: () => void,
-  animationControls?: { playTalkingAnimation: () => void; stopAllAnimations: () => void }
+  animationControls?: { 
+    playTalkingAnimation: () => void; 
+    stopAllAnimations: () => void;
+    startIdleSystem: () => void;
+  }
 ): AvatarSpeechControls {
   const [state, setState] = useState<AvatarSpeechState>({
     isPlaying: false,
@@ -333,6 +337,12 @@ export function useAvatarSpeech(
             setState(prev => ({ ...prev, isPlaying: false }));
             clearEmotionalExpression(message.emotionalIntent, true); // 👈 wasSpeaking = true
             
+            // ✅ FIXED: Stop talking animation immediately when speech ends
+            if (animationControls?.stopAllAnimations) {
+              animationControls.stopAllAnimations();
+              console.log('🛑 Stopped talking animation when speech ended');
+            }
+            
            
             
             // Clear all viseme morphs
@@ -345,10 +355,17 @@ export function useAvatarSpeech(
               console.log('Calling onMessagePlayed to process next message');
               onMessagePlayed();
               console.log('onMessagePlayed called, audioSourceRef cleared:', audioSourceRef.current === null);
-               // Stop talking animation
+              
+              // ✅ IMPROVED: Only stop ALL animations if this was the last message
               if (messages.length === 1) {
-                console.log('Played the last message, No messages left, stopping all animations');
-                animationControls?.stopAllAnimations();
+                console.log('Played the last message, No messages left');
+                // Animation already stopped above, just need to start idle
+                setTimeout(() => {
+                  if (animationControls?.startIdleSystem) {
+                    animationControls.startIdleSystem();
+                    console.log('🎯 Started idle system after last message');
+                  }
+                }, 500); // Small delay to ensure clean transition
               }
             }
           }
