@@ -1,8 +1,5 @@
 import { FacialExpressions } from "@/types/avatar";
-import { corresponding as VISEME_MAP } from './visemeMapping';
-
 export const avatarModel = "/models/68bafcdfc11cea25ec03e4f1.glb";
-
 export * from './animations';
 
 export const facialExpressions: FacialExpressions = {
@@ -1068,8 +1065,9 @@ export const MORPH_CATEGORIES = {
     // Tongue (part of mouth system)
     'tongueOut',
     
-    // Viseme morphs (from VISEME_MAP)
-    ...Object.values(VISEME_MAP),
+    // Viseme morphs (from VISEME_MAP) - using hardcoded values to avoid initialization order issues
+    'viseme_PP', 'viseme_kk', 'viseme_I', 'viseme_aa', 'viseme_O', 
+    'viseme_U', 'viseme_FF', 'viseme_TH', 'viseme_sil',
   ],
   
   // Non-mouth morphs (safe during lip-sync)
@@ -1217,7 +1215,7 @@ export const expressionUtils = {
     let adaptedMorphs = expressionUtils.removeMouthMorphs(morphs);
     
     // If we have a specific emotion alternative, use it
-    if (emotionName && emotionName in speechAdaptedExpressions.alternatives) {
+    if (emotionName && emotionName in speechAdaptedExpressions.alternatives as any) {
       const alternative = speechAdaptedExpressions.alternatives[emotionName as keyof typeof speechAdaptedExpressions.alternatives];
       // Merge alternative morphs, prioritizing alternative values
       adaptedMorphs = { ...adaptedMorphs, ...alternative };

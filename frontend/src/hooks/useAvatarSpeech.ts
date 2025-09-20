@@ -1,35 +1,10 @@
 import { useCallback, useEffect, useRef, useState } from 'react';
 import type { MessageResponse, EmotionalIntent, LipSyncData } from '@/types';
 import type { MorphTargetControls } from './useMorphTargets';
-import { corresponding as VISEME_MAP } from '@/constants/visemeMapping';
-import { facialExpressions, expressionUtils } from '@/constants';
+import { visemeMapping as VISEME_MAP, EMOTION_MAP } from '@/constants/visemeMapping';
+import { expressionUtils } from '@/constants';
 import { useMounted } from '@/hooks/share/useMounted';
 
-// Emotion mapping from emotion names to facial expressions
-const EMOTION_MAP: Record<string, any> = {
-  happy: facialExpressions.joy,
-  sad: facialExpressions.sad,
-  angry: facialExpressions.angry,
-  surprised: facialExpressions.surprised,
-  fear: facialExpressions.fear,
-  disgusted: facialExpressions.disgusted,
-  excited: facialExpressions.euphoric,
-  confused: facialExpressions.confused,
-  thoughtful: facialExpressions.thoughtful,
-  playful: facialExpressions.playful,
-  romantic: facialExpressions.flirtatious,
-  caring: facialExpressions.welcoming,
-  mischievous: facialExpressions.mischievous,
-  shy: facialExpressions.embarrassed,
-  confident: facialExpressions.proud,
-  curious: facialExpressions.curious,
-  serious: facialExpressions.focused,
-  frustrated: facialExpressions.frustrated,
-  // Default fallbacks
-  joy: facialExpressions.joy,
-  neutral: facialExpressions.default,
-  default: facialExpressions.default,
-};
 
 export interface AvatarSpeechState {
   isPlaying: boolean;
@@ -284,7 +259,7 @@ export function useAvatarSpeech(
 
   // Main effect to handle new messages
   useEffect(() => {
-    console.log('useEffect triggered - messages:', messages.length, 'isPlaying:', state.isPlaying, 'isCleaningUp:', isCleaningUpRef.current);
+    console.log('useEffect triggered - messages received:', messages.length, 'isPlaying:', state.isPlaying, 'isCleaningUp:', isCleaningUpRef.current);
     
     if (messages.length === 0) {
       console.log('No messages in queue');
@@ -310,16 +285,10 @@ export function useAvatarSpeech(
     }
     
     const startSpeech = async () => {
-      try {
-        console.log('Starting speech process...');
-        console.log('Message has audio:', !!message.audio, 'has lipsync:', !!message.lipsync);
-        
+      try {       
         // Ensure we're not in cleanup state
         isCleaningUpRef.current = false;
-        
-        console.log('Starting speech with message:', message.text);
-        console.log('Queue remaining:', messages.length, 'messages');
-                
+                       
         // Decode and play audio
         const audioBuffer = await decodeAudio(message.audio!);
         const audioContext = await initAudioContext();
@@ -340,12 +309,8 @@ export function useAvatarSpeech(
           duration,
         });
         
-        console.log('Set isPlaying to true, duration:', duration);
-        
         // Start talking animation
-        if (animationControls?.playTalkingAnimation) {
-          animationControls.playTalkingAnimation();
-        }
+        animationControls?.playTalkingAnimation();
         
         // Apply emotional expression WITH speech adaptation
         applyEmotionalExpression(message.emotionalIntent, true); // 👈 isSpeaking = true
@@ -368,14 +333,11 @@ export function useAvatarSpeech(
             setState(prev => ({ ...prev, isPlaying: false }));
             clearEmotionalExpression(message.emotionalIntent, true); // 👈 wasSpeaking = true
             
-            // Stop talking animation
-            if (animationControls?.stopAllAnimations) {
-              animationControls.stopAllAnimations();
-            }
+           
             
             // Clear all viseme morphs
             Object.values(VISEME_MAP).forEach(morphName => {
-              morphControls.lerpMorphTarget(morphName, 0, 0.1);
+              morphControls.lerpMorphTarget(morphName, 0, 0.4);
             });
             
             // Call onMessagePlayed to remove from queue and trigger next message
@@ -383,6 +345,11 @@ export function useAvatarSpeech(
               console.log('Calling onMessagePlayed to process next message');
               onMessagePlayed();
               console.log('onMessagePlayed called, audioSourceRef cleared:', audioSourceRef.current === null);
+               // Stop talking animation
+              if (messages.length === 1) {
+                console.log('Played the last message, No messages left, stopping all animations');
+                animationControls?.stopAllAnimations();
+              }
             }
           }
         };
@@ -396,9 +363,7 @@ export function useAvatarSpeech(
         setState({ isPlaying: false, currentTime: 0, duration: 0 });
         
         // Stop animation on error
-        if (animationControls?.stopAllAnimations) {
-          animationControls.stopAllAnimations();
-        }
+        animationControls?.stopAllAnimations();
         
         // Still call onMessagePlayed on error to prevent stuck queue
         if (onMessagePlayed) {

@@ -36,14 +36,8 @@ export function Avatar(props: AvatarProps) {
     group 
   });
   // Initialize avatar speech system with animation integration
-  const speechControls = useAvatarSpeech(messages, morphTargetControls, onMessagePlayed, {
-    playTalkingAnimation: animationControls.playTalkingAnimation,
-    stopAllAnimations: animationControls.stopAllAnimations
-  });
+  useAvatarSpeech(messages, morphTargetControls, onMessagePlayed, animationControls);
   
-  console.log('speech state:', speechControls.state);
-  
- 
   
   // Initialize idle animation system after speechControls
   // const idleControls = useIdleSystem(morphTargetControls, speechControls.state.isPlaying, {

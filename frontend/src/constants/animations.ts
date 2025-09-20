@@ -12,7 +12,6 @@ export const ANIMATION_CONFIG = {
   // Talking animations (used during speech)
   talkingAnimations: [
     'Talking_0',
-    'Thinking',
     'Talking_1', 
     'Talking_2',
   ],
@@ -46,3 +45,4 @@ export type IdleAnimationConfig = {
 };
 
 export type AnimationConfig = typeof ANIMATION_CONFIG;
+

@@ -16,8 +16,8 @@ export interface AnimationControls {
   startIdleSystem: () => void;
   stopIdleSystem: () => void;
   stopAllAnimations: () => void;
-  getCurrentState: () => AnimationState;
-  getCurrentAnimation: () => AnimationName | null;
+  // getCurrentState: () => AnimationState;
+  // getCurrentAnimation: () => AnimationName | null;
   updateMixer: (delta: number) => void;
 }
 
@@ -26,7 +26,7 @@ export function useAnimations({ animations, group }: UseAnimationsProps): Animat
   const currentAction = useRef<THREE.AnimationAction | null>(null);
   const currentAnimationName = useRef<AnimationName | null>(null);
   const [animationState, setAnimationState] = useState<AnimationState>('idle');
-  const animationStateRef = useRef<AnimationState>('idle'); // ✅ Fix stale closure
+  const animationStateRef = useRef<AnimationState>('idle');
   const idleTimer = useRef<NodeJS.Timeout | null>(null);
 
   // Suppress Three.js PropertyBinding warnings
@@ -190,11 +190,21 @@ export function useAnimations({ animations, group }: UseAnimationsProps): Animat
 
   // Stop idle animation system
   const stopIdleSystem = useCallback(() => {
+     // Clear tất cả timers
     if (idleTimer.current) {
       clearTimeout(idleTimer.current);
       idleTimer.current = null;
-      logger.info('😴 Idle animation system stopped');
     }
+    
+    // Clear bất kỳ timer nào khác có thể đang chạy
+    // (nếu có multiple timers trong idle system)
+    
+    // Đảm bảo animation state không phải idle khi đang talking
+    if (animationStateRef.current === 'talking') {
+      return; // Không restart idle system
+    }
+    
+    logger.info('�� Idle animation system stopped');
   }, []);
 
   // Stop all animations
@@ -204,18 +214,18 @@ export function useAnimations({ animations, group }: UseAnimationsProps): Animat
       currentAction.current = null;
       currentAnimationName.current = null;
       setAnimationState('idle');
-      logger.info('⏹️ All animations stopped');
+      logger.info('⏹️ All animations stopped - Set animation state to idle');
     }
     stopIdleSystem();
   }, [stopIdleSystem]);
 
   // Get current state
-  const getCurrentState = useCallback(() => animationState, [animationState]);
-  console.log('getCurrentState', getCurrentState());
+  // const getCurrentState = useCallback(() => animationState, [animationState]);
+  // console.log('getCurrentState', getCurrentState());
 
-  // Get current animation name
-  const getCurrentAnimation = useCallback(() => currentAnimationName.current, []);
-  console.log('getCurrentAnimation', getCurrentAnimation());
+  // // Get current animation name
+  // const getCurrentAnimation = useCallback(() => currentAnimationName.current, []);
+  // console.log('getCurrentAnimation', getCurrentAnimation());
 
   // Update mixer in animation frame
   const updateMixer = useCallback((delta: number) => {
@@ -253,8 +263,8 @@ export function useAnimations({ animations, group }: UseAnimationsProps): Animat
     startIdleSystem,
     stopIdleSystem,
     stopAllAnimations,
-    getCurrentState,
-    getCurrentAnimation,
+    // getCurrentState,
+    // getCurrentAnimation,
     updateMixer,
   };
 }
