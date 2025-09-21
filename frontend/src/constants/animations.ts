@@ -35,11 +35,5 @@ export const ANIMATION_CONFIG = {
 export type AnimationName = string;
 export type EmotionType = keyof typeof ANIMATION_CONFIG.emotionalAnimations;
 
-// Types for idle animation configuration
-export type IdleAnimationConfig = {
-  name: AnimationName;
-  loop: boolean | number; // true = infinite, number = specific count
-};
-
 export type AnimationConfig = typeof ANIMATION_CONFIG;
 

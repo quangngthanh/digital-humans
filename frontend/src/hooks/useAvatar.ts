@@ -61,11 +61,9 @@ export function useAvatar(
       
       // Configure loop
       if (infinite===true) {
-        console.log('🔧 Looping animation: infinite');
         action.setLoop(THREE.LoopRepeat, Infinity);
       } else if (typeof infinite === 'number') {
-        console.log('🔧 Looping animation:', infinite, 'times');
-        action.setLoop(THREE.LoopRepeat, infinite); // Loop 3 times for idle
+        action.setLoop(THREE.LoopRepeat, infinite);
         action.clampWhenFinished = true;
       }
       
@@ -150,17 +148,10 @@ export function useAvatar(
     
     const talkingAnimNames = ANIMATION_CONFIG.talkingAnimations;
     const availableTalking = animations.filter(anim => 
-      talkingAnimNames.some(name => anim.name.includes(name))
+      talkingAnimNames.some(name => anim.name === name)
     );
     
-    if (availableTalking.length === 0) {
-      console.log('🔧 No talking animations found, using first animation');
-      // Fallback to first animation if no talking animations
-      if (animations.length > 0) {
-        playAnimation(animations[0], true);
-      }
-      return;
-    }
+    const delay = 4000 + Math.random() * 6000;
     
     console.log('🗣️ Starting talking animation system with', availableTalking.length, 'animations');
     
@@ -178,7 +169,7 @@ export function useAvatar(
       // Schedule next talking animation change
       setTimeout(() => {
         cycleTalkingAnimation();
-      }, 4000); // Change talking animation every 3 seconds
+      }, delay); // Change talking animation every 3 seconds
     };
     
     // Start immediately
@@ -229,19 +220,6 @@ export function useAvatar(
     }
 
     console.log('🔧 Starting lipsync with', lipsyncData.mouthCues.length, 'cues');
-    console.log('🔧 Morph controls available:', !!morphTargetControls);
-    console.log('🔧 First few cues:', lipsyncData.mouthCues.slice(0, 3));
-    
-    // Test morph target controls
-    if (morphTargetControls) {
-      console.log('🔧 Testing morph target controls...');
-      try {
-        morphTargetControls.setMorphTarget('viseme_aa', 0.5);
-        setTimeout(() => morphTargetControls.setMorphTarget('viseme_aa', 0), 100);
-      } catch (e) {
-        console.warn('⚠️ Morph target test failed:', e);
-      }
-    }
     
     speechStartTimeRef.current = Date.now();
     
@@ -300,7 +278,7 @@ export function useAvatar(
       const message = speechQueueRef.current.shift();
       if (!message) continue;
 
-      console.log('🔧 Processing message from queue:', message.text?.substring(0, 50));
+      console.log('🔧 Processing message from queue:', message.text?.substring(0, 50) + '...');
       
       // Process single message
       await processSingleMessage(message);
@@ -447,8 +425,6 @@ export function useAvatar(
 
   // Real speech function with audio and lip-sync
   const speak = useCallback(async (message: any) => {
-    console.log('🔧 Real speech processing:', message);
-    
     // Prevent duplicate speech processing using ref
     if (currentStateRef.current === 'speaking') {
       console.log('⚠️ Already speaking, ignoring new speech request');

@@ -39,8 +39,6 @@ export function Avatar(props: AvatarProps) {
     console.log('🔧 Message handler:', messages.length, 'Avatar ready:', avatar.state.isInitialized);
     if (messages.length > 0 && avatar.state.isInitialized && !avatar.state.isSpeaking) {
       const message = messages[0];
-      console.log('🔧 Processing message (not speaking):', message);
-      
       // Use real speech processing
       avatar.controls.speak(message).then((success) => {
         console.log('✅ Speech completed:', success);
