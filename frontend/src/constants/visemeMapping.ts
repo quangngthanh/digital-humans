@@ -1,17 +1,7 @@
 import { VisemeMapping } from "@/types/avatar";
 import { facialExpressions } from ".";
 
-/**
- * 👄 COMPREHENSIVE RHUBARB LIP SYNC MAPPING
- * 
- * Maps Rhubarb's 9 mouth shapes (A-H, X) to Ready Player Me's Oculus visemes
- * Based on official documentation and phonetic analysis
- * 
- * References:
- * - Rhubarb: https://github.com/DanielSWolf/rhubarb-lip-sync
- * - Ready Player Me: https://docs.readyplayer.me/ready-player-me/api-reference/avatars/morph-targets/oculus-ovr-libsync
- */
-export const visemeMapping: VisemeMapping = {
+export const VISEME_MAP: VisemeMapping = {
     /** 🅰️ Closed mouth for P, B, M sounds - bilabial closure with slight pressure */
     A: "viseme_PP",
     

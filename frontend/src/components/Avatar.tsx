@@ -1,110 +1,109 @@
 import { useGLTF } from "@react-three/drei";
 import { button, useControls } from "leva";
-import { useRef, useState } from "react";
+import { useRef, useState, useEffect } from "react";
 import * as THREE from "three";
-
-import { useAnimations } from "@/hooks/useAnimations";
+import { useFrame } from "@react-three/fiber";
 import { useMorphTargets } from "@/hooks/useMorphTargets";
 import { useBlinkSystem } from "@/hooks/useBlinkSystem";
 import { useLoadAnimations } from "@/hooks/useLoadAnimations";
-import { useAvatarSpeech } from "@/hooks/useAvatarSpeech";
+import { useChatContext } from "@/hooks/useChatContext";
 
+// Types and constants
 import type { AvatarProps } from "@/types";
 import { avatarModel } from "@/constants";
 import { GLTFResult } from "@/types/avatar";
-import { useFrame } from "@react-three/fiber";
-import { useChatContext } from "@/hooks/useChatContext";
+
+import { useAvatar } from "@/hooks/useAvatar";
 
 export function Avatar(props: AvatarProps) {
   const gltfData = useGLTF(avatarModel) as GLTFResult;   
   const { nodes, materials, scene } = gltfData;
 
-  const { 
-    animations
-  } = useLoadAnimations();
+  // Load animations
+  const { animations } = useLoadAnimations();
     
   const group = useRef<THREE.Group>(null);
+  
   const morphTargetControls = useMorphTargets(scene);
   const { animateBlink } = morphTargetControls;
 
+  // Blink system (independent)
   useBlinkSystem(animateBlink);
 
-  const {sendMessage, messages, onMessagePlayed} = useChatContext();
+  // Chat context (for testing)
+  const { sendMessage, messages, onMessagePlayed } = useChatContext();
 
-  const animationControls = useAnimations({ 
-    animations, 
-    group 
-  });
-  // Initialize avatar speech system with animation integration
-  useAvatarSpeech(messages, morphTargetControls, onMessagePlayed, animationControls);
-  
-  
-  // Initialize idle animation system after speechControls
-  // const idleControls = useIdleSystem(morphTargetControls, speechControls.state.isPlaying, {
-  //   interval: [4, 10], // 4-10 seconds between idle animations
-  //   enabled: true
-  // });
+  const avatar = useAvatar(group, animations, morphTargetControls);
+
+  useEffect(() => {
+    console.log('🔧 Message handler:', messages.length, 'Avatar ready:', avatar.state.isInitialized);
+    if (messages.length > 0 && avatar.state.isInitialized && !avatar.state.isSpeaking) {
+      const message = messages[0];
+      console.log('🔧 Processing message (not speaking):', message);
+      
+      // Use real speech processing
+      avatar.controls.speak(message).then((success) => {
+        console.log('✅ Speech completed:', success);
+        onMessagePlayed();
+      }).catch((error) => {
+        console.error('❌ Speech error:', error);
+        onMessagePlayed();
+      });
+    } else if (messages.length > 0) {
+      console.log('🔧 Skipping message - already speaking or not ready');
+    }
+  }, [messages, avatar.state.isInitialized, avatar.state.isSpeaking, onMessagePlayed, avatar.controls]);
+
+  // ============================================================================
+  // UI CONTROLS & DEBUGGING
+  // ============================================================================
   
   const [avatarPosition] = useState<[number, number, number]>([0, -0.5, -2.4]);
   const [avatarScale] = useState<[number, number, number]>([1.5, 1.5, 1.5]);
   
-  // useControls("Available Animations", () => {
-  //   const controls: Record<string, any> = {};
-    
-  //   animations.forEach(anim => {
-  //     controls[anim.name] = button(() => {
-  //       animationControls.playAnimation(anim.name);
-  //     });
-  //   });
-    
-  //   return controls;
-  // });
-
-  useControls("Facial Controls", {
+  // Debug controls
+  useControls("Avatar System (+ Animations)", {
+    // Chat testing
     testChat: button(() => {
+      console.log('🔧 test chat clicked');
       sendMessage('Hello, em có khỏe không ?');
     }),
-    // debugMorphTargets: button(() => {
-    //   // Debug available morph targets
-    //   scene?.traverse((child) => {
-    //     const mesh = child as unknown as THREE.SkinnedMesh;
-    //     if (mesh.isSkinnedMesh && mesh.morphTargetDictionary) {
-    //       console.log(`${mesh.name} morph targets:`, Object.keys(mesh.morphTargetDictionary));
-    //     }
-    //   });
-    // }),
-    testViseme: button(() => {
-      // Test a specific viseme
-      morphTargetControls.setMorphTarget('viseme_aa', 1);
-      setTimeout(() => morphTargetControls.setMorphTarget('viseme_aa', 0), 1000);
+    
+    
+    showStatus: button(() => {
+      const metrics = avatar.controls.getPerformanceMetrics();
+      console.log('🔧 Avatar Status:', metrics);
     }),
-    // stopSpeech: button(() => {
-    //   speechControls.stop();
-    // }),
-    // blink: button(() => {
-    //   morphTargetControls.animateBlink();
-    // }),
-    // winkLeft: button(() => {
-    //   morphTargetControls.animateWink('left');
-    // }),
-    // winkRight: button(() => {
-    //   morphTargetControls.animateWink('right');
-    // }),
-    // resetFace: button(() => {
-    //   morphTargetControls.resetAllMorphTargets();
-    // }),
   });
+
+  // ============================================================================
+  // ANIMATION FRAME UPDATE
+  // ============================================================================
   
-  // Animation frame update
   useFrame((_, delta) => {
     try {
-      if (animationControls.updateMixer) {
-        animationControls.updateMixer(delta);
-      }
+      avatar.controls.updateMixer(delta);
     } catch (error) {
       console.error('Error in useFrame:', error);
     }
   });
+
+  // ============================================================================
+  // STATUS LOGGING
+  // ============================================================================
+  
+  useEffect(() => {
+    if (avatar.state.isInitialized) {
+      console.log('✅ Avatar Ready:', {
+        initialized: avatar.state.isInitialized,
+        error: avatar.state.error
+      });
+    }
+  }, [avatar.state]);
+
+  // ============================================================================
+  // RENDER AVATAR MODEL
+  // ============================================================================
 
   return (
     <group 
@@ -192,5 +191,3 @@ export function Avatar(props: AvatarProps) {
 
 // Preload models
 useGLTF.preload(avatarModel);
-
-  // Individual GLB animations are preloaded in useLoadAnimations hook

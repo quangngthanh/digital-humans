@@ -1,14 +1,11 @@
 // Animation configurations
 export const ANIMATION_CONFIG = {
   // Idle animations with loop configurations
-  idleAnimations: [
-    { name: 'BreathingIdle', loop: 8 }, 
-    { name: 'Looking', loop: 3 }, 
-  ],
-  
-  // Default idle animation (played during delay periods)
-  defaultIdleAnimation: 'Idle',
-  
+  idleAnimations: {
+    BreathingIdle: 8, 
+    Standing: 3, 
+  },
+    
   // Talking animations (used during speech)
   talkingAnimations: [
     'Talking_0',

@@ -15,10 +15,8 @@ function getAllGlbFiles(): string[] {
     '/animations/Thankful.glb',
     '/animations/Thinking.glb',
     '/animations/Walking.glb',
-    '/animations/SadIdle.glb',
-    '/animations/DrawfIdle.glb',
     '/animations/BreathingIdle.glb',
-    '/animations/Idle.glb',
+    '/animations/Standing.glb',
   ];
 }
 
@@ -58,7 +56,7 @@ export function useLoadAnimations(): LoadAnimationsData {
     }
   });
 
-  // Process loaded animations
+  // Process loaded animations - use a more stable dependency
   const processedAnimations = useMemo(() => {
     const animations: THREE.AnimationClip[] = [];
     const loadedAnimations: LoadedAnimation[] = [];
@@ -85,7 +83,7 @@ export function useLoadAnimations(): LoadAnimationsData {
     });
 
     return { animations, loadedAnimations };
-  }, [loadedGLTFs]);
+  }, [loadedGLTFs.map(g => g.path).join(',')]); // Use path string as dependency instead of full object
 
   // Calculate loading stats
   const loadedCount = loadedGLTFs.filter(({ data, error }) => data && !error).length;
