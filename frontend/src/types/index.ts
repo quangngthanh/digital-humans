@@ -120,3 +120,6 @@ export interface AppConfig {
   defaultVoiceId: string;
   audioConfig: AudioConfig;
 }
+
+// Re-export speech types
+export * from './speech';

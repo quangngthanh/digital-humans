@@ -1,4 +1,4 @@
-import { createContext, useContext, useEffect, useState, ReactNode } from "react";
+import { createContext, useContext, useState, ReactNode } from "react";
 import type { MessageResponse, ChatContextType, ChatMessageRequest, ChatResponse } from "@/types";
 import apiClient from "@/lib/api/apiClient";
 import { apiRoutes } from "@/routes/route";

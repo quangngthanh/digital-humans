@@ -1,5 +1,6 @@
 import { useRef, KeyboardEvent } from "react";
 import { useChatContext } from "@/hooks/useChatContext";
+import { VoiceButton } from "@/components/VoiceButton";
 
 interface UIProps {
   hidden?: boolean;
@@ -24,6 +25,20 @@ export const UI = ({ hidden }: UIProps) => {
         input.current.value = "";
       } catch (error) {
         console.error('Failed to send message:', error);
+      }
+    }
+  };
+
+  const handleVoiceTranscript = async (transcript: string): Promise<void> => {
+    if (!loading && !message && transcript.trim()) {
+      try {
+        await sendMessage(transcript);
+        // Clear input if there was text
+        if (input.current) {
+          input.current.value = "";
+        }
+      } catch (error) {
+        console.error('Failed to send voice message:', error);
       }
     }
   };
@@ -59,7 +74,7 @@ export const UI = ({ hidden }: UIProps) => {
         <div className="w-full flex flex-col items-end justify-center gap-4">
           <button
             onClick={toggleCamera}
-            className="pointer-events-auto bg-pink-500 hover:bg-pink-600 text-white p-4 rounded-md transition-colors"
+            className="pointer-events-auto bg-blue-500 hover:bg-blue-600 text-white p-4 rounded-md transition-colors"
             aria-label={cameraZoomed ? "Zoom out camera" : "Zoom in camera"}
           >
             {cameraZoomed ? (
@@ -96,7 +111,7 @@ export const UI = ({ hidden }: UIProps) => {
           </button>
           <button
             onClick={toggleGreenScreen}
-            className="pointer-events-auto bg-pink-500 hover:bg-pink-600 text-white p-4 rounded-md transition-colors"
+            className="pointer-events-auto bg-blue-500 hover:bg-blue-600 text-white p-4 rounded-md transition-colors"
             aria-label="Toggle green screen"
           >
             <svg
@@ -122,10 +137,20 @@ export const UI = ({ hidden }: UIProps) => {
             onKeyDown={handleKeyDown}
             disabled={loading || !!message}
           />
+          
+          {/* Voice Button */}
+          <div className="relative">
+            <VoiceButton 
+              onTranscript={handleVoiceTranscript}
+              disabled={loading || !!message}
+              className="pointer-events-auto"
+            />
+          </div>
+
           <button
             disabled={loading || !!message}
             onClick={handleSendMessage}
-            className={`bg-pink-500 hover:bg-pink-600 text-white p-4 px-10 font-semibold uppercase rounded-md transition-colors ${
+            className={`bg-blue-500 hover:bg-blue-600 text-white p-4 px-10 font-semibold uppercase rounded-md transition-colors ${
               loading || message ? "cursor-not-allowed opacity-30" : ""
             }`}
           >
